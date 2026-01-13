@@ -24,3 +24,119 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 22% 18%, rgba(56, 189, 248, 0.2), transparent 60%),
+    radial-gradient(130% 110% at 78% 12%, rgba(168, 85, 247, 0.22), transparent 55%),
+    radial-gradient(160% 140% at 72% 78%, rgba(45, 151, 198, 0.22), transparent 65%),
+    linear-gradient(150deg, #020617 0%, #0b1222 38%, #11192a 65%, #202635 100%);
+  background-size: 240% 240%;
+  animation: heroGradient 28s ease-in-out infinite;
+  filter: saturate(1.05);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.06), transparent 45%),
+    radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.05), transparent 35%);
+  mix-blend-mode: screen;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.14) 0, rgba(255, 255, 255, 0.08) 20%, transparent 50%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 120px 120px, 120px 120px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+@keyframes heroGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes floatTag {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(3px, -10px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Hero section responsive scaling */
+[data-hero-section] {
+  will-change: transform;
+}
+
+[data-hero-section] h1 {
+  font-size: clamp(2rem, 5vw + 1rem, 4.5rem);
+}
+
+[data-hero-section] p {
+  font-size: clamp(1rem, 2vw + 0.5rem, 1.25rem);
+}
+
+/* Smooth animations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Performance optimizations */
+[data-hero-section] > * {
+  will-change: transform;
+}
+
+/* Ensure gradient patches blend smoothly */
+.absolute {
+  will-change: transform, opacity;
+}
+
+/* Hero heading typography - responsive sizing */
+.hero-heading-white {
+  font-size: clamp(2rem, 8vw, 64px);
+  display: inline-block;
+  overflow: visible;
+}
+
+.hero-heading-blue {
+  font-size: clamp(2.5rem, 10vw, 80px);
+  display: inline-block;
+  overflow: visible;
+  position: relative;
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 1024px) {
+  .hero-heading-white {
+    font-size: 64px;
+  }
+  
+  .hero-heading-blue {
+    font-size: 80px;
+  }
+}

@@ -36,11 +36,11 @@ export default function HeroSection() {
 
 				{/* Hero Content */}
 				<HeroContent>
-					<div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16" style={{ overflow: 'visible' }}>
-						<div className="text-center" style={{ overflow: 'visible' }}>
+					<div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 py-12 sm:py-12 lg:py-16" style={{ overflow: 'visible' }}>
+						<div className="text-center flex flex-col items-center" style={{ overflow: 'visible' }}>
 							{/* Two-line Heading */}
 							<h1
-								className="flex flex-col items-center justify-center relative mb-4 sm:mb-6 lg:mb-8"
+								className="flex flex-col items-center justify-center relative mb-6 sm:mb-6 lg:mb-8"
 								style={{
 									overflow: 'visible',
 									paddingBottom: '4px',
@@ -52,7 +52,7 @@ export default function HeroSection() {
 									style={{
 										fontFamily: 'var(--font-manrope), sans-serif',
 										fontWeight: 400,
-										lineHeight: '100%',
+										lineHeight: '110%',
 										letterSpacing: '0%',
 										color: '#E5E7EB',
 										whiteSpace: 'normal',
@@ -62,7 +62,7 @@ export default function HeroSection() {
 									<span className="inline sm:whitespace-nowrap">Understand your website's progress</span>
 								</span>
 								<span
-									className="block hero-heading-blue text-center mt-2 sm:mt-3"
+									className="block hero-heading-blue text-center mt-3 sm:mt-3"
 									style={{
 										fontFamily: 'var(--font-manrope), sans-serif',
 										fontWeight: 700,
@@ -86,11 +86,11 @@ export default function HeroSection() {
 
 							{/* Subtext */}
 							<p
-								className="mt-4 sm:mt-6 lg:mt-8 max-w-xl mx-auto text-center text-base sm:text-lg lg:text-xl"
+								className="mt-8 sm:mt-6 lg:mt-8 max-w-xl mx-auto text-center text-base sm:text-lg lg:text-xl px-2"
 								style={{
 									fontFamily: 'var(--font-source-sans-3), sans-serif',
 									fontWeight: 400,
-									lineHeight: '100%',
+									lineHeight: '140%',
 									letterSpacing: '0%',
 									color: '#676A74',
 								}}
@@ -100,7 +100,7 @@ export default function HeroSection() {
 							</p>
 
 							{/* Buttons */}
-							<div className="mt-24 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-4 lg:gap-6">
+							<div className="mt-12 sm:mt-16 lg:mt-24 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-4 lg:gap-6 w-full max-w-md sm:max-w-none px-2">
 								<a
 									href="#"
 									className="w-full sm:w-auto sm:flex-none rounded-full px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-base xl:text-lg font-semibold text-black shadow-lg hover:scale-105 hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#60CAF9] transition-all duration-300 text-center"

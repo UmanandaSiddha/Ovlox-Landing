@@ -9,16 +9,40 @@ export default function Footer() {
 	return (
 		<footer className="relative py-12 sm:py-16 overflow-hidden border-t border-slate-800/50">
 			<AnimatedGradient />
-			
+
 			<div className="w-full px-4 sm:px-6 lg:w-[90%] lg:mx-auto relative z-10 lg:px-8">
 				{/* Main Footer Content */}
-				<div className="flex flex-row md:grid md:grid-cols-3 gap-6 md:gap-12 mb-6 md:mb-8">
+				<div className="flex flex-col md:grid md:grid-cols-3 gap-6 md:gap-12 mb-6 md:mb-8">
 					{/* Left Section - Logo and Text */}
-					<div className="flex flex-col flex-1">
-						{/* Logo - Only on mobile, hidden on desktop (shown in middle on desktop) */}
-						<div className="mb-4 md:hidden">
-							<Image src={ovloxFooterLogo} alt="Ovlox Logo" width={120} height={120} className="w-16 h-16" />
+					<div className="mb-4 md:hidden w-full">
+						<div className="flex w-full items-center justify-between">
+							<Image src={ovloxFooterLogo} alt="Ovlox Logo" width={120} height={120} />
+							<div className="flex items-center gap-2">
+								<a
+									href="#"
+									className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
+									aria-label="X (Twitter)"
+								>
+									<SiX className="w-4 h-4 text-[#020617]" />
+								</a>
+								<a
+									href="#"
+									className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
+									aria-label="Facebook"
+								>
+									<SiFacebook className="w-4 h-4 text-[#020617]" />
+								</a>
+								<a
+									href="#"
+									className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
+									aria-label="Instagram"
+								>
+									<SiInstagram className="w-4 h-4 text-[#020617]" />
+								</a>
+							</div>
 						</div>
+					</div>
+					<div className="flex flex-row justify-between items-center">
 						<p
 							className="text-white text-sm sm:text-base leading-relaxed"
 							style={{ fontFamily: 'var(--font-source-sans-3), sans-serif' }}
@@ -27,23 +51,8 @@ export default function Footer() {
 							transparency to<br />
 							product development.
 						</p>
-					</div>
 
-					{/* Middle Section - Logo (Desktop only) */}
-					<div className="hidden md:flex flex-col items-center justify-center">
-						<Image src={ovloxFooterLogo} alt="Ovlox Logo" width={120} height={120} className="w-20 h-20 sm:w-24 sm:h-24 lg:w-[120px] lg:h-[120px]" />
-					</div>
-
-					{/* Right Section - Connect with Us and Links (Mobile) / Social Icons (Desktop) */}
-					<div className="flex flex-col items-end justify-end flex-1 md:flex-none md:justify-start">
-						{/* Mobile: Show "Connect with Us" and links vertically */}
 						<div className="md:hidden flex flex-col items-end gap-3">
-							<h3
-								className="text-white text-sm font-semibold"
-								style={{ fontFamily: 'var(--font-manrope), sans-serif' }}
-							>
-								Connect with Us
-							</h3>
 							<a
 								href="#"
 								className="text-sky-400 hover:text-sky-300 underline transition text-sm"
@@ -59,7 +68,16 @@ export default function Footer() {
 								Terms of Service
 							</a>
 						</div>
-						
+					</div>
+
+					{/* Middle Section - Logo (Desktop only) */}
+					<div className="hidden md:flex flex-col items-center justify-center">
+						<Image src={ovloxFooterLogo} alt="Ovlox Logo" width={120} height={120} className="w-20 h-20 sm:w-24 sm:h-24 lg:w-[120px] lg:h-[120px]" />
+					</div>
+
+					{/* Right Section - Connect with Us and Links (Mobile) / Social Icons (Desktop) */}
+					<div className="flex flex-col items-end justify-end flex-1 md:flex-none md:justify-start">
+
 						{/* Desktop: Show "Connect with Us" and social icons */}
 						<div className="hidden md:flex flex-col items-end">
 							<h3
@@ -77,7 +95,7 @@ export default function Footer() {
 								>
 									<SiX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#020617]" />
 								</a>
-								
+
 								{/* Facebook Icon */}
 								<a
 									href="#"
@@ -86,7 +104,7 @@ export default function Footer() {
 								>
 									<SiFacebook className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#020617]" />
 								</a>
-								
+
 								{/* Instagram Icon */}
 								<a
 									href="#"

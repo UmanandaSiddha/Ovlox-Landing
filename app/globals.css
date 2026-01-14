@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020617;
+  --foreground: #e5e7eb;
 }
 
 @theme inline {
@@ -100,6 +100,27 @@ body {
   }
 }
 
+/* Navigation hover underline effect */
+.nav-link-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #ffffff;
+  transition: width 0.3s ease-out;
+}
+
+.nav-link-underline:hover::after {
+  width: 100%;
+}
+
 /* Hero section responsive scaling */
 [data-hero-section] {
   will-change: transform;
@@ -120,7 +141,7 @@ body {
 }
 
 /* Performance optimizations */
-[data-hero-section] > * {
+[data-hero-section]>* {
   will-change: transform;
 }
 
@@ -149,7 +170,7 @@ body {
   .hero-heading-white {
     font-size: 64px;
   }
-  
+
   .hero-heading-blue {
     font-size: 80px;
   }

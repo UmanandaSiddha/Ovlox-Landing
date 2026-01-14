@@ -42,8 +42,10 @@ export default function ProjectProgressSection() {
 				</p>
 
 				{/* Video */}
-				<div className="mb-16 rounded-lg overflow-hidden border border-[#60CAF9]/30">
-					<HeroVideo />
+				<div id="video-section" className="mb-16 rounded-lg overflow-hidden border border-[#60CAF9]/30">
+					<div id="video-section-actual">
+						<HeroVideo />
+					</div>
 				</div>
 
 				{/* Three Feature Cards */}

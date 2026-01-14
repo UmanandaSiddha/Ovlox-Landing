@@ -50,46 +50,33 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 		if (isMobile) return // Disable auto-slide on mobile
 
 		const interval = setInterval(() => {
-			setCurrentIndex((prev) => {
-				const newIndex = prev + 1
-				// Reset to 0 when we reach the end, but the infinite array makes it seamless
-				return newIndex >= testimonials.length ? 0 : newIndex
-			})
+			setCurrentIndex((prev) => prev + 1)
 		}, 5000) // Auto-slide every 5 seconds
 
 		return () => clearInterval(interval)
 	}, [isMobile, testimonials.length])
 
-	// Handle seamless loop reset - reset instantly when at boundaries
+	// Ensure index stays in range when toggling to mobile or resizing
 	useEffect(() => {
-		if (isMobile || isTransitioning) return
-
-		// When we reach the end, instantly reset to 0 (invisible because of infinite array)
-		if (currentIndex >= testimonials.length) {
-			setCurrentIndex(0)
-		} else if (currentIndex < 0) {
-			setCurrentIndex(testimonials.length - 1)
+		if (isMobile) {
+			setCurrentIndex((prev) => {
+				if (!testimonials.length) return 0
+				return ((prev % testimonials.length) + testimonials.length) % testimonials.length
+			})
 		}
-	}, [currentIndex, isMobile, isTransitioning, testimonials.length])
+	}, [isMobile, testimonials.length])
 
 	const nextSlide = () => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
-		setCurrentIndex((prev) => {
-			const newIndex = prev + 1
-			// Allow going beyond length for seamless transition
-			return newIndex >= testimonials.length ? 0 : newIndex
-		})
+		setCurrentIndex((prev) => prev + 1)
 		setTimeout(() => setIsTransitioning(false), 600)
 	}
 
 	const prevSlide = () => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
-		setCurrentIndex((prev) => {
-			const newIndex = prev - 1
-			return newIndex < 0 ? testimonials.length - 1 : newIndex
-		})
+		setCurrentIndex((prev) => prev - 1)
 		setTimeout(() => setIsTransitioning(false), 600)
 	}
 
@@ -102,19 +89,19 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 
 	// Calculate exact transform position for seamless infinite carousel
 	const getTransform = () => {
-		// Desktop: Start at middle set, then move based on currentIndex
-		// This creates seamless looping - when currentIndex resets to 0,
-		// we're already at the next set in the infinite array
-		const baseOffset = startIndex * ITEM_WIDTH
-		const currentOffset = currentIndex * ITEM_WIDTH
-		return `-${baseOffset + currentOffset}px`
+		// Use modulo to get position within the infinite array
+		// This ensures smooth infinite scrolling
+		const position = ((currentIndex % testimonials.length) + testimonials.length) % testimonials.length
+		const offset = (startIndex + position) * ITEM_WIDTH
+		return `-${offset}px`
 	}
 
 	// Mobile transform - simple percentage based
 	const getMobileTransform = () => {
 		if (!testimonials.length) return '0%'
-		// Move exactly one slide width (100% / total slides) per step on mobile
-		return `-${(100 / testimonials.length) * currentIndex}%`
+		// Wrap index so it never overshoots; show exactly one card width per step
+		const position = ((currentIndex % testimonials.length) + testimonials.length) % testimonials.length
+		return `-${(100 / testimonials.length) * position}%`
 	}
 
 	return (
@@ -196,8 +183,10 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 					</div>
 
 					{/* Desktop Carousel */}
-					<div className="hidden lg:block overflow-hidden" style={{ maxWidth: ITEM_WIDTH * 3 }}>
-						<div className="w-full overflow-visible relative pl-4" style={{ height: 'auto' }}>
+					<div className="hidden lg:block overflow-hidden relative" style={{ width: ITEM_WIDTH * 2 + CARD_WIDTH * 0.6 }}>
+						{/* Gradient fade for peeking item */}
+						<div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#020617] to-transparent z-10 pointer-events-none" />
+						<div className="w-full overflow-visible relative" style={{ height: 'auto' }}>
 							<motion.div
 								className="flex gap-6"
 								animate={{
@@ -210,15 +199,6 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 								}}
 								style={{
 									width: `${infiniteTestimonials.length * ITEM_WIDTH}px`
-								}}
-								onAnimationComplete={() => {
-									// Reset index after animation for seamless infinite loop
-									// This happens invisibly because we're using the infinite array
-									if (currentIndex >= testimonials.length) {
-										setCurrentIndex(0)
-									} else if (currentIndex < 0) {
-										setCurrentIndex(testimonials.length - 1)
-									}
 								}}
 							>
 								{infiniteTestimonials.map((testimonial, index) => (

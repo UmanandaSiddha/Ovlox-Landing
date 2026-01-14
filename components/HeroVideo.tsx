@@ -12,6 +12,8 @@ export default function HeroVideo() {
     const [isMuted, setIsMuted] = useState(false)
     const [volume, setVolume] = useState(1)
 
+    const HLS_URL = "https://dy7x01gt6ljdu.cloudfront.net/videos/intro/intro.m3u8";
+
     useEffect(() => {
         const video = videoRef.current
         if (!video) return
@@ -23,17 +25,21 @@ export default function HeroVideo() {
 
         // ✅ Safari (native HLS)
         if (video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = "/video-output/intro.m3u8"
+            video.src = HLS_URL
 
             video.addEventListener("loadedmetadata", () => {
                 video.play().then(() => {
                     setIsPlaying(true)
                     setIsMuted(false)
                 }).catch(() => {
-                    // If autoplay fails, try muted
+                    // If autoplay with sound fails, try muted (browser policy)
                     video.muted = true
                     setIsMuted(true)
-                    video.play().catch(() => { })
+                    video.play().then(() => {
+                        setIsPlaying(true)
+                    }).catch(() => {
+                        setIsPlaying(false)
+                    })
                 })
                 setReady(true)
             })
@@ -55,7 +61,7 @@ export default function HeroVideo() {
                 backBufferLength: 30,
             })
 
-            hls.loadSource("/video-output/intro.m3u8")
+            hls.loadSource(HLS_URL)
             hls.attachMedia(video)
 
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -63,10 +69,14 @@ export default function HeroVideo() {
                     setIsPlaying(true)
                     setIsMuted(false)
                 }).catch(() => {
-                    // If autoplay fails, try muted
+                    // If autoplay with sound fails, try muted (browser policy)
                     video.muted = true
                     setIsMuted(true)
-                    video.play().catch(() => { })
+                    video.play().then(() => {
+                        setIsPlaying(true)
+                    }).catch(() => {
+                        setIsPlaying(false)
+                    })
                 })
                 setReady(true)
             })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { OvloxLogo } from "@/assets"
@@ -14,11 +14,19 @@ const navigation = [
 
 export default function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+	const [isSticky, setIsSticky] = useState(false)
+
+	useEffect(() => {
+		const onScroll = () => setIsSticky(window.scrollY > 10)
+		onScroll()
+		window.addEventListener('scroll', onScroll)
+		return () => window.removeEventListener('scroll', onScroll)
+	}, [])
 
 	return (
-		<header className="absolute inset-x-0 top-0 z-50 w-full">
+		<header className={`${isSticky ? 'fixed bg-[#020617] shadow-lg border-b border-slate-800/40' : 'absolute'} inset-x-0 top-0 z-50 w-full transition-colors duration-200`}>
 			<div className="w-full lg:w-[90%] lg:mx-auto">
-				<nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">
+				<nav aria-label="Global" className="flex items-center justify-between p-4 lg:px-8">
 					<div className="flex lg:flex-1">
 						<a href="#" className="-m-1.5 p-1.5">
 							<span className="sr-only">Your Company</span>
@@ -68,13 +76,12 @@ export default function Header() {
 							<a
 								key={item.name}
 								href={item.href}
-								className="nav-link text-sm xl:text-base"
+								className="nav-link-underline text-sm xl:text-base pb-2 text-[#E5E7EB] hover:text-white transition-colors duration-200"
 								style={{
 									fontFamily: 'var(--font-source-sans-3), sans-serif',
 									fontWeight: 400,
 									lineHeight: '100%',
 									letterSpacing: '0%',
-									color: '#E5E7EB',
 								}}
 							>
 								{item.name}
@@ -82,12 +89,12 @@ export default function Header() {
 						))}
 					</div>
 					<div className="hidden lg:flex lg:flex-1 lg:justify-end">
-						<a href="#" className="text-xs xl:text-sm font-semibold text-white border border-[#60CAF9] px-3 xl:px-4 py-1.5 rounded-full hover:bg-[#60CAF9]/10 hover:scale-105 hover:shadow-[0_0_20px_rgba(96,202,249,0.3)] transition-all duration-300">
+						<a href="#" className="text-xs xl:text-sm font-semibold text-white border border-[#60CAF9] px-3 xl:px-4 py-2 rounded-full hover:bg-[#60CAF9]/10 hover:scale-105 hover:shadow-[0_0_20px_rgba(96,202,249,0.3)] transition-all duration-300">
 							Start Free Trial
 						</a>
 					</div>
 				</nav>
-				
+
 				<AnimatePresence>
 					{mobileMenuOpen && (
 						<>
@@ -100,7 +107,7 @@ export default function Header() {
 								className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] lg:hidden"
 								onClick={() => setMobileMenuOpen(false)}
 							/>
-							
+
 							{/* Sidebar with slide animation */}
 							<motion.div
 								initial={{ x: '-100%' }}
@@ -135,13 +142,13 @@ export default function Header() {
 											</svg>
 										</button>
 									</div>
-									
+
 									<div className="flex-1 px-6 py-6 space-y-1 overflow-y-auto min-h-0">
 										{navigation.map((item) => (
 											<a
 												key={item.name}
 												href={item.href}
-												className="block px-4 py-3 text-base font-medium text-gray-200 hover:text-white hover:bg-[#60CAF9]/10 rounded-lg transition-colors"
+												className="block px-4 py-3 text-base font-medium text-gray-200 hover:text-white hover:bg-[#60CAF9]/10 rounded-lg transition-colors relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-[#60CAF9] after:left-4 after:bottom-1 hover:after:w-[calc(100%-2rem)] after:transition-all after:duration-300"
 												style={{
 													fontFamily: 'var(--font-source-sans-3), sans-serif',
 												}}
@@ -151,7 +158,7 @@ export default function Header() {
 											</a>
 										))}
 									</div>
-									
+
 									<div className="p-6 border-t border-slate-800/50 flex-shrink-0">
 										<a
 											href="#"

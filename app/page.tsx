@@ -10,6 +10,7 @@ import ConnectToolsSection from "@/components/ConnectToolsSection"
 import TestimonialsSection from "@/components/TestimonialsSection"
 import WaitlistSection from "@/components/WaitlistSection"
 import Footer from "@/components/Footer"
+import StickyVideoController from "@/components/StickyVideoController"
 
 const testimonials = [
 	{
@@ -93,31 +94,32 @@ export default function Home() {
 	return (
 		<div className="bg-[#020617] min-h-screen w-full">
 			<Header />
-			
+			<StickyVideoController />
+
 			{/* Hero Section - No animation, appears immediately */}
 			<HeroSection />
-			
+
 			{/* Animated Sections with subtle staggered delays */}
 			<AnimatedSection delay={0.1}>
 				<ProjectProgressSection />
 			</AnimatedSection>
-			
+
 			<AnimatedSection delay={0.15}>
 				<EverythingYouNeedSection />
 			</AnimatedSection>
-			
+
 			<AnimatedSection delay={0.1}>
 				<ConnectToolsSection />
 			</AnimatedSection>
-			
+
 			<AnimatedSection delay={0.15}>
 				<TestimonialsSection testimonials={testimonials} />
 			</AnimatedSection>
-			
+
 			<AnimatedSection delay={0.1}>
 				<WaitlistSection />
 			</AnimatedSection>
-			
+
 			<AnimatedSection delay={0.05}>
 				<Footer />
 			</AnimatedSection>

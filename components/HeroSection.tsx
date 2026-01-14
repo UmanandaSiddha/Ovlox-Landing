@@ -26,21 +26,21 @@ export default function HeroSection() {
 			{/* Floating Platform Icons */}
 			<FloatingPlatformIcons />
 
-			{/* 90% width container for content */}
-			<div className="w-[90%] mx-auto relative z-10">
-				{/* Hero Tags */}
-				<div className="absolute inset-0 pointer-events-none">
+			{/* Full width with padding on mobile, 90% on larger screens */}
+			<div className="w-full px-4 sm:px-6 lg:w-[90%] lg:mx-auto relative z-10">
+				{/* Hero Tags - Hidden on mobile */}
+				<div className="hidden sm:block absolute inset-0 pointer-events-none">
 					<HeroTag name="Roger" position="left" />
 					<HeroTag name="Rad" position="right" />
 				</div>
 
 				{/* Hero Content */}
 				<HeroContent>
-					<div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
+					<div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16" style={{ overflow: 'visible' }}>
 						<div className="text-center" style={{ overflow: 'visible' }}>
 							{/* Two-line Heading */}
 							<h1
-								className="flex flex-col items-center justify-center relative"
+								className="flex flex-col items-center justify-center relative mb-4 sm:mb-6 lg:mb-8"
 								style={{
 									overflow: 'visible',
 									paddingBottom: '4px',
@@ -48,21 +48,21 @@ export default function HeroSection() {
 								}}
 							>
 								<span
-									className="block hero-heading-white"
+									className="block hero-heading-white text-center"
 									style={{
 										fontFamily: 'var(--font-manrope), sans-serif',
 										fontWeight: 400,
 										lineHeight: '100%',
 										letterSpacing: '0%',
 										color: '#E5E7EB',
-										whiteSpace: 'nowrap',
+										whiteSpace: 'normal',
 										overflow: 'visible',
 									}}
 								>
-									Understand your website's progress
+									<span className="inline sm:whitespace-nowrap">Understand your website's progress</span>
 								</span>
 								<span
-									className="block hero-heading-blue"
+									className="block hero-heading-blue text-center mt-2 sm:mt-3"
 									style={{
 										fontFamily: 'var(--font-manrope), sans-serif',
 										fontWeight: 700,
@@ -75,40 +75,42 @@ export default function HeroSection() {
 										overflow: 'visible',
 										paddingBottom: '12px',
 										marginBottom: '8px',
+										whiteSpace: 'normal',
 									}}
 								>
-									without reading code
+									<span className="sm:whitespace-nowrap">without reading</span>
+									<br className="sm:hidden" />
+									<span className="sm:whitespace-nowrap"> code</span>
 								</span>
 							</h1>
 
 							{/* Subtext */}
 							<p
-								className="mt-4 max-w-xl mx-auto text-center"
+								className="mt-4 sm:mt-6 lg:mt-8 max-w-xl mx-auto text-center text-base sm:text-lg lg:text-xl"
 								style={{
 									fontFamily: 'var(--font-source-sans-3), sans-serif',
 									fontWeight: 400,
-									fontSize: '20px',
 									lineHeight: '100%',
 									letterSpacing: '0%',
 									color: '#676A74',
 								}}
 							>
-								Track updates from GitHub, Jira, Slack, and more<br />
+								Track updates from GitHub, Jira, Slack, and more<br className="hidden sm:block" />
 								summarized clearly for <span style={{ fontStyle: 'italic', color: '#E5E7EB' }}>founders</span>
 							</p>
 
 							{/* Buttons */}
-							<div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+							<div className="mt-24 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-4 lg:gap-6">
 								<a
 									href="#"
-									className="w-full sm:w-auto rounded-full px-6 py-3 text-md font-semibold text-black shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#60CAF9] transition-colors"
+									className="w-full sm:w-auto sm:flex-none rounded-full px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-base xl:text-lg font-semibold text-black shadow-lg hover:scale-105 hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#60CAF9] transition-all duration-300 text-center"
 									style={{ background: 'linear-gradient(to right, #38BDF8, #60CAF9)' }}
 								>
 									See it in Action
 								</a>
 								<a
 									href="#"
-									className="w-full sm:w-auto rounded-full border-2 border-[#60CAF9] px-6 py-3 text-md font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#60CAF9] transition-colors"
+									className="w-full sm:w-auto sm:flex-none rounded-full border-2 border-[#60CAF9] px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-base xl:text-lg font-semibold text-white hover:scale-105 hover:bg-[#60CAF9]/10 hover:shadow-[0_0_20px_rgba(96,202,249,0.4)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#60CAF9] transition-all duration-300 text-center"
 								>
 									Book a Demo
 								</a>

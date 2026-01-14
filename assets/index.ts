@@ -10,3 +10,11 @@ export { default as QuotesIcon } from "./quotes.svg";
 
 export { default as RightArrow } from "./right_arrow";
 export { default as LeftArrow } from "./left_arrow";
+
+export { default as ovloxFooterLogo } from "./ovlox_footer_logo.svg";
+
+export { default as PauseIcon } from "./pause.svg";
+export { default as ResumeIcon } from "./resume.svg";
+export { default as VolumeUpIcon } from "./volume_up.svg";
+export { default as VolumeDownIcon } from "./mute.svg";
+export { default as ResizeIcon } from "./resize.svg";

@@ -1,11 +1,15 @@
 'use client'
 
+import { useRef } from "react"
+import { motion, useInView, useReducedMotion } from "framer-motion"
 import Header from "@/components/Header"
 import HeroSection from "@/components/HeroSection"
 import ProjectProgressSection from "@/components/ProjectProgressSection"
 import EverythingYouNeedSection from "@/components/EverythingYouNeedSection"
 import ConnectToolsSection from "@/components/ConnectToolsSection"
 import TestimonialsSection from "@/components/TestimonialsSection"
+import WaitlistSection from "@/components/WaitlistSection"
+import Footer from "@/components/Footer"
 
 const testimonials = [
 	{
@@ -52,15 +56,71 @@ const testimonials = [
 	},
 ]
 
-export default function Home() {
+// Section wrapper component with scroll animation
+function AnimatedSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+	const ref = useRef(null)
+	const isInView = useInView(ref, { once: true, margin: "-120px" })
+	const shouldReduceMotion = useReducedMotion()
+
+	const customVariants = {
+		hidden: { opacity: 0, y: 25 },
+		visible: {
+			opacity: 1,
+			y: 0,
+			transition: {
+				duration: 0.7,
+				ease: [0.16, 1, 0.3, 1] as const, // Custom easing for smooth, natural motion
+				delay: delay,
+			},
+		},
+	}
+
 	return (
-		<div className="bg-[#020617] min-h-screen">
+		<motion.div
+			ref={ref}
+			initial="hidden"
+			animate={isInView ? "visible" : "hidden"}
+			variants={shouldReduceMotion ? {} : customVariants}
+			className={className}
+		>
+			{children}
+		</motion.div>
+	)
+}
+
+export default function Home() {
+
+	return (
+		<div className="bg-[#020617] min-h-screen w-full">
 			<Header />
+			
+			{/* Hero Section - No animation, appears immediately */}
 			<HeroSection />
-			<ProjectProgressSection />
-			<EverythingYouNeedSection />
-			<ConnectToolsSection />
-			<TestimonialsSection testimonials={testimonials} />
+			
+			{/* Animated Sections with subtle staggered delays */}
+			<AnimatedSection delay={0.1}>
+				<ProjectProgressSection />
+			</AnimatedSection>
+			
+			<AnimatedSection delay={0.15}>
+				<EverythingYouNeedSection />
+			</AnimatedSection>
+			
+			<AnimatedSection delay={0.1}>
+				<ConnectToolsSection />
+			</AnimatedSection>
+			
+			<AnimatedSection delay={0.15}>
+				<TestimonialsSection testimonials={testimonials} />
+			</AnimatedSection>
+			
+			<AnimatedSection delay={0.1}>
+				<WaitlistSection />
+			</AnimatedSection>
+			
+			<AnimatedSection delay={0.05}>
+				<Footer />
+			</AnimatedSection>
 		</div>
 	)
 }

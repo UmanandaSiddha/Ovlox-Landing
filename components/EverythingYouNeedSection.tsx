@@ -10,8 +10,8 @@ export default function EverythingYouNeedSection() {
 			{/* Animated Gradient Background */}
 			<AnimatedGradient />
 
-			{/* 90% width container */}
-			<div className="w-[90%] mx-auto relative z-10 px-4 sm:px-6 lg:px-8">
+			{/* Full width with padding on mobile, 90% on larger screens */}
+			<div className="w-full px-4 sm:px-6 lg:w-[90%] lg:mx-auto relative z-10 lg:px-8">
 				{/* Header */}
 				<h2
 					className="text-center mb-6"
@@ -29,11 +29,10 @@ export default function EverythingYouNeedSection() {
 
 				{/* Subtitle */}
 				<p
-					className="text-center max-w-3xl mx-auto mb-16"
+					className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 lg:mb-16 text-base sm:text-lg lg:text-xl"
 					style={{
 						fontFamily: 'var(--font-source-sans-3), sans-serif',
 						fontWeight: 400,
-						fontSize: '20px',
 						lineHeight: '140%',
 						letterSpacing: '0%',
 						color: '#676A74',
@@ -44,18 +43,17 @@ export default function EverythingYouNeedSection() {
 
 				{/* Feature Boxes - 2x2 Grid */}
 				<div className="max-w-5xl mx-auto">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
 						{/* Stay in Control */}
-						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-6">
-							<div className="flex flex-col items-start gap-4">
-								<Image src={ControlIcon} alt="Control" width={42} height={42} />
+						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 hover:scale-105 cursor-pointer">
+							<div className="flex flex-col items-start gap-3 sm:gap-4">
+								<Image src={ControlIcon} alt="Control" width={42} height={42} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-[42px] lg:h-[42px]" />
 								<div>
 									<h3
-										className="mb-3"
+										className="mb-2 sm:mb-3 text-lg sm:text-xl lg:text-2xl"
 										style={{
 											fontFamily: 'var(--font-manrope), sans-serif',
 											fontWeight: 700,
-											fontSize: '24px',
 											lineHeight: '120%',
 											letterSpacing: '0%',
 											color: '#E5E7EB',
@@ -64,10 +62,10 @@ export default function EverythingYouNeedSection() {
 										Stay in Control
 									</h3>
 									<p
+										className="text-sm sm:text-base"
 										style={{
 											fontFamily: 'var(--font-source-sans-3), sans-serif',
 											fontWeight: 400,
-											fontSize: '16px',
 											lineHeight: '140%',
 											letterSpacing: '0%',
 											color: '#676A74',
@@ -80,16 +78,15 @@ export default function EverythingYouNeedSection() {
 						</div>
 
 						{/* See Progress Clearly */}
-						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-6">
-							<div className="flex flex-col items-start gap-4">
-								<Image src={ProgressIcon} alt="Progress" width={42} height={42} />
+						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 hover:scale-105 cursor-pointer">
+							<div className="flex flex-col items-start gap-3 sm:gap-4">
+								<Image src={ProgressIcon} alt="Progress" width={42} height={42} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-[42px] lg:h-[42px]" />
 								<div>
 									<h3
-										className="mb-3"
+										className="mb-2 sm:mb-3 text-lg sm:text-xl lg:text-2xl"
 										style={{
 											fontFamily: 'var(--font-manrope), sans-serif',
 											fontWeight: 700,
-											fontSize: '24px',
 											lineHeight: '120%',
 											letterSpacing: '0%',
 											color: '#E5E7EB',
@@ -98,10 +95,10 @@ export default function EverythingYouNeedSection() {
 										See Progress Clearly
 									</h3>
 									<p
+										className="text-sm sm:text-base"
 										style={{
 											fontFamily: 'var(--font-source-sans-3), sans-serif',
 											fontWeight: 400,
-											fontSize: '16px',
 											lineHeight: '140%',
 											letterSpacing: '0%',
 											color: '#676A74',
@@ -114,16 +111,15 @@ export default function EverythingYouNeedSection() {
 						</div>
 
 						{/* Adjust Anytime */}
-						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-6">
-							<div className="flex flex-col items-start gap-4">
-								<Image src={AdjustIcon} alt="Adjust" width={42} height={42} />
+						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 hover:scale-105 cursor-pointer">
+							<div className="flex flex-col items-start gap-3 sm:gap-4">
+								<Image src={AdjustIcon} alt="Adjust" width={42} height={42} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-[42px] lg:h-[42px]" />
 								<div>
 									<h3
-										className="mb-3"
+										className="mb-2 sm:mb-3 text-lg sm:text-xl lg:text-2xl"
 										style={{
 											fontFamily: 'var(--font-manrope), sans-serif',
 											fontWeight: 700,
-											fontSize: '24px',
 											lineHeight: '120%',
 											letterSpacing: '0%',
 											color: '#E5E7EB',
@@ -132,10 +128,10 @@ export default function EverythingYouNeedSection() {
 										Adjust Anytime
 									</h3>
 									<p
+										className="text-sm sm:text-base"
 										style={{
 											fontFamily: 'var(--font-source-sans-3), sans-serif',
 											fontWeight: 400,
-											fontSize: '16px',
 											lineHeight: '140%',
 											letterSpacing: '0%',
 											color: '#676A74',
@@ -148,16 +144,15 @@ export default function EverythingYouNeedSection() {
 						</div>
 
 						{/* One Clean Dashboard */}
-						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-6">
-							<div className="flex flex-col items-start gap-4">
-								<Image src={DashboardIcon} alt="Dashboard" width={42} height={42} />
+						<div className="bg-[#0F172A] border border-[#60CAF9] rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 hover:scale-105 cursor-pointer">
+							<div className="flex flex-col items-start gap-3 sm:gap-4">
+								<Image src={DashboardIcon} alt="Dashboard" width={42} height={42} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-[42px] lg:h-[42px]" />
 								<div>
 									<h3
-										className="mb-3"
+										className="mb-2 sm:mb-3 text-lg sm:text-xl lg:text-2xl"
 										style={{
 											fontFamily: 'var(--font-manrope), sans-serif',
 											fontWeight: 700,
-											fontSize: '24px',
 											lineHeight: '120%',
 											letterSpacing: '0%',
 											color: '#E5E7EB',
@@ -166,10 +161,10 @@ export default function EverythingYouNeedSection() {
 										One Clean Dashboard
 									</h3>
 									<p
+										className="text-sm sm:text-base"
 										style={{
 											fontFamily: 'var(--font-source-sans-3), sans-serif',
 											fontWeight: 400,
-											fontSize: '16px',
 											lineHeight: '140%',
 											letterSpacing: '0%',
 											color: '#676A74',

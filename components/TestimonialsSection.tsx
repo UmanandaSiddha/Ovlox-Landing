@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { useState, useEffect, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { LeftArrow, QuotesIcon, RightArrow } from "@/assets"
 import AnimatedGradient from "@/components/AnimatedGradient"
@@ -22,6 +22,8 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const [isMobile, setIsMobile] = useState(false)
 	const [isLargeScreen, setIsLargeScreen] = useState(false)
+	const [isTransitioning, setIsTransitioning] = useState(false)
+	const carouselRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		const checkScreenSize = () => {
@@ -33,39 +35,84 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 		return () => window.removeEventListener('resize', checkScreenSize)
 	}, [])
 
-	// Mobile: 1 item, Desktop: 2 full + 1 peeking, Large: 3 full + 1 peeking
+	// Constants
+	const CARD_WIDTH = 398 // Card max width
+	const GAP = 24 // Gap between items (gap-6 = 24px)
+	const ITEM_WIDTH = CARD_WIDTH + GAP // Total width per item including gap
 	const itemsPerView = isMobile ? 1 : isLargeScreen ? 3.5 : 2.5
-	const maxIndex = isMobile 
-		? Math.max(0, testimonials.length - 1)
-		: isLargeScreen
-		? Math.max(0, testimonials.length - 3) // Large: can scroll until 3rd to last item
-		: Math.max(0, testimonials.length - 2) // Desktop: can scroll until 2nd to last item
+
+	// Create infinite carousel by duplicating testimonials (3 sets for seamless looping)
+	const infiniteTestimonials = [...testimonials, ...testimonials, ...testimonials]
+	const startIndex = testimonials.length // Start at the middle set
+
+	// Auto-slide functionality
+	useEffect(() => {
+		if (isMobile) return // Disable auto-slide on mobile
+
+		const interval = setInterval(() => {
+			setCurrentIndex((prev) => {
+				const newIndex = prev + 1
+				// Reset to 0 when we reach the end, but the infinite array makes it seamless
+				return newIndex >= testimonials.length ? 0 : newIndex
+			})
+		}, 5000) // Auto-slide every 5 seconds
+
+		return () => clearInterval(interval)
+	}, [isMobile, testimonials.length])
+
+	// Handle seamless loop reset - reset instantly when at boundaries
+	useEffect(() => {
+		if (isMobile || isTransitioning) return
+
+		// When we reach the end, instantly reset to 0 (invisible because of infinite array)
+		if (currentIndex >= testimonials.length) {
+			setCurrentIndex(0)
+		} else if (currentIndex < 0) {
+			setCurrentIndex(testimonials.length - 1)
+		}
+	}, [currentIndex, isMobile, isTransitioning, testimonials.length])
 
 	const nextSlide = () => {
+		if (isTransitioning) return
+		setIsTransitioning(true)
 		setCurrentIndex((prev) => {
-			if (isMobile) {
-				if (prev >= maxIndex) return 0
-				return prev + 1
-			} else {
-				if (prev >= maxIndex) return 0
-				return prev + 1
-			}
+			const newIndex = prev + 1
+			// Allow going beyond length for seamless transition
+			return newIndex >= testimonials.length ? 0 : newIndex
 		})
+		setTimeout(() => setIsTransitioning(false), 600)
 	}
 
 	const prevSlide = () => {
+		if (isTransitioning) return
+		setIsTransitioning(true)
 		setCurrentIndex((prev) => {
-			if (prev <= 0) return maxIndex
-			return prev - 1
+			const newIndex = prev - 1
+			return newIndex < 0 ? testimonials.length - 1 : newIndex
 		})
+		setTimeout(() => setIsTransitioning(false), 600)
 	}
 
 	const goToSlide = (index: number) => {
-		if (isMobile) {
-			setCurrentIndex(Math.min(index, maxIndex))
-		} else {
-			setCurrentIndex(Math.min(index, maxIndex))
-		}
+		if (isTransitioning) return
+		setIsTransitioning(true)
+		setCurrentIndex(index)
+		setTimeout(() => setIsTransitioning(false), 600)
+	}
+
+	// Calculate exact transform position for seamless infinite carousel
+	const getTransform = () => {
+		// Desktop: Start at middle set, then move based on currentIndex
+		// This creates seamless looping - when currentIndex resets to 0,
+		// we're already at the next set in the infinite array
+		const baseOffset = startIndex * ITEM_WIDTH
+		const currentOffset = currentIndex * ITEM_WIDTH
+		return `-${baseOffset + currentOffset}px`
+	}
+
+	// Mobile transform - simple percentage based
+	const getMobileTransform = () => {
+		return `-${ITEM_WIDTH * currentIndex}px`
 	}
 
 	return (
@@ -74,7 +121,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 			<AnimatedGradient />
 
 			{/* 90% width container for content, but carousel extends to 100% */}
-			<div className="w-[90%] mx-auto relative z-10 px-4 sm:px-6 lg:px-8">
+			<div className="absolute mx-auto relative z-10">
 				{/* Header */}
 				<h2
 					className="text-center mb-16"
@@ -90,13 +137,11 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 					Real Progress. Real Stories.
 				</h2>
 
-				{/* Content Grid */}
-				<div className="flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-16 items-start lg:items-end relative">
-					{/* Left Side - Text and Navigation */}
-					<div className="hidden lg:flex flex-col items-start gap-6 w-[20%] flex-shrink-0 relative z-20" style={{ maxWidth: 'calc(70vw - 5vw)' }}>
+				<div className="flex items-center justify-between">
+
+					<div className="hidden lg:flex pl-30 flex-col items-start gap-6 w-[22%] flex-shrink-0 relative z-20" style={{ maxWidth: 'calc(70vw - 5vw)' }}>
 						<Image src={QuotesIcon} alt="Quotes" width={96} height={96} />
 
-						{/* Text */}
 						<h3
 							className="text-left"
 							style={{
@@ -111,173 +156,171 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 							What our customers are saying
 						</h3>
 
-						{/* Navigation Controls */}
-						<div className="mt-8 flex items-center gap-3">
+						<div className="mt-8 flex gap-2 justify-between items-center w-full max-w-full overflow-hidden">
 							<button
 								onClick={prevSlide}
 								disabled={currentIndex === 0}
-								className="p-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+								className="py-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 hover:scale-110 disabled:hover:scale-100"
 								aria-label="Previous testimonial"
 							>
 								<LeftArrow color={currentIndex === 0 ? "#353845" : "#E5E7EB"} />
 							</button>
 
-							<div className="flex items-center rounded-full">
-								{testimonials.map((_, index) => (
-									<button
-										key={index}
-										onClick={() => goToSlide(index)}
-										className={`h-0.5 transition-all ${index === currentIndex ? 'w-8 bg-white' : 'w-8 bg-white/30'
-											}`}
-										aria-label={`Go to testimonial ${index + 1}`}
-									/>
-								))}
+							<div className="flex items-center justify-center">
+								{testimonials.map((_, index) => {
+									// Calculate the actual index for infinite carousel
+									const actualIndex = currentIndex % testimonials.length
+									return (
+										<button
+											key={index}
+											onClick={() => goToSlide(index)}
+											className={`h-0.5 transition-all flex-shrink-0 ${index === actualIndex ? 'w-8 bg-white' : 'w-5 bg-white/30'
+												}`}
+											aria-label={`Go to testimonial ${index + 1}`}
+										/>
+									)
+								})}
 							</div>
 
 							<button
 								onClick={nextSlide}
-								disabled={currentIndex >= maxIndex}
-								className="p-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+								disabled={isTransitioning}
+								className="py-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 hover:scale-110 disabled:hover:scale-100"
 								aria-label="Next testimonial"
 							>
-								<RightArrow color={currentIndex >= maxIndex ? "#353845" : "#E5E7EB"} />
+								<RightArrow color={isTransitioning ? "#353845" : "#E5E7EB"} />
 							</button>
 						</div>
 					</div>
 
-					{/* Right Side - Carousel - starts after left side, extends to 100% on right */}
-					<div 
-						className="hidden lg:block flex-1 absolute overflow-visible"
-						style={{ 
-							// Container is 90% width, centered (5vw margin each side)
-							// Left side is 20% of container = 18vw
-							// Left side ends at: 5vw (container start) + 18vw (left side width) = 23vw
-							left: '23vw', // Start after left side ends
-							right: 0, // Extend to 100% (edge of screen)
-							width: '77vw', // 100vw - 23vw = 77vw
-							bottom: 0, // Align to bottom of parent flex container
-							top: 'auto'
-						}}
-					>
+					{/* Desktop Carousel */}
+					<div className="hidden lg:block overflow-hidden" style={{ maxWidth: ITEM_WIDTH * 3 }}>
 						<div className="w-full overflow-visible relative pl-4" style={{ height: 'auto' }}>
-						<motion.div
-							className="flex gap-6"
-							animate={{
-								x: isMobile
-									? `-${currentIndex * 100}%`
-									: currentIndex === 0 ? '0px' : `-${currentIndex * 422}px` // Desktop: start at 0, then move by item width
-							}}
-							transition={{
-								type: "tween",
-								ease: [0.25, 0.1, 0.25, 1],
-								duration: 0.6
-							}}
-							style={{
-								width: isMobile
-									? `${testimonials.length * 100}%`
-									: `${testimonials.length * 422}px` // Desktop: total width (398px card + 24px gap per item)
-							}}
-						>
-							{testimonials.map((testimonial, index) => (
+							<motion.div
+								className="flex gap-6"
+								animate={{
+									x: getTransform()
+								}}
+								transition={{
+									type: "tween",
+									ease: [0.25, 0.1, 0.25, 1],
+									duration: 0.6
+								}}
+								style={{
+									width: `${infiniteTestimonials.length * ITEM_WIDTH}px`
+								}}
+								onAnimationComplete={() => {
+									// Reset index after animation for seamless infinite loop
+									// This happens invisibly because we're using the infinite array
+									if (currentIndex >= testimonials.length) {
+										setCurrentIndex(0)
+									} else if (currentIndex < 0) {
+										setCurrentIndex(testimonials.length - 1)
+									}
+								}}
+							>
+							{infiniteTestimonials.map((testimonial, index) => (
 								<div
-									key={testimonial.id}
+									key={`testimonial-${index}-${testimonial.id}`}
 									className="flex-shrink-0 flex justify-center"
 									style={{
-										width: isMobile ? '100%' : isLargeScreen ? '422px' : '422px', // Same width for all desktop sizes
+										width: `${ITEM_WIDTH}px`, // Exact item width including gap
 									}}
 								>
-									<div
-										className="rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden w-full"
-										style={{
-											maxWidth: 398,
-											height: 224,
-											borderRadius: 16,
-											border: '0.1px solid rgb(45, 82, 97)',
-											background: 'linear-gradient(to bottom, #02061700 0%, #38BDF81A 100%)',
-											boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-										}}
-									>
-										{/* Stars */}
-										<div className="flex gap-1.5 mb-4">
-											{[...Array(5)].map((_, i) => (
-												<svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-													<path d="M10 0L12.2451 6.90983H19.5106L13.6327 11.1803L15.8779 18.0902L10 13.8197L4.12215 18.0902L6.36729 11.1803L0.489435 6.90983H7.75486L10 0Z" fill="#38BDF8" />
-												</svg>
-											))}
-										</div>
-
-										{/* Quote */}
-										<p
-											className="mb-5 flex-1 overflow-hidden"
+										<div
+											className="rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden w-full"
 											style={{
-												fontFamily: 'var(--font-source-sans-3), sans-serif',
-												fontWeight: 400,
-												fontSize: '16px',
-												lineHeight: '160%',
-												letterSpacing: '0%',
-												color: '#E5E7EB',
-												display: '-webkit-box',
-												WebkitLineClamp: 7,
-												WebkitBoxOrient: 'vertical',
-												textOverflow: 'ellipsis',
-												overflow: 'hidden',
+												maxWidth: 398,
+												height: 224,
+												borderRadius: 16,
+												border: '0.1px solid rgb(45, 82, 97)',
+												background: 'linear-gradient(to bottom, #02061700 0%, #38BDF81A 100%)',
+												boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
 											}}
 										>
-											{testimonial.quote}
-										</p>
-
-										{/* Author */}
-										<div className="flex items-center gap-4 mt-auto pt-2">
-											<div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-1 ring-white/10">
-												<Image
-													src={testimonial.avatar}
-													alt={testimonial.name}
-													width={40}
-													height={40}
-													className="w-full h-full object-cover"
-												/>
+											{/* Stars */}
+											<div className="flex gap-1.5 mb-4">
+												{[...Array(5)].map((_, i) => (
+													<svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+														<path d="M10 0L12.2451 6.90983H19.5106L13.6327 11.1803L15.8779 18.0902L10 13.8197L4.12215 18.0902L6.36729 11.1803L0.489435 6.90983H7.75486L10 0Z" fill="#38BDF8" />
+													</svg>
+												))}
 											</div>
-											<div>
-												<p
-													className="mb-1"
-													style={{
-														fontFamily: 'var(--font-manrope), sans-serif',
-														fontWeight: 600,
-														fontSize: '14px',
-														lineHeight: '140%',
-														letterSpacing: '0%',
-														color: '#E5E7EB',
-													}}
-												>
-													{testimonial.name}
-												</p>
-												<p
-													style={{
-														fontFamily: 'var(--font-source-sans-3), sans-serif',
-														fontWeight: 400,
-														fontSize: '13px',
-														lineHeight: '140%',
-														letterSpacing: '0%',
-														color: '#9CA3AF',
-													}}
-												>
-													{testimonial.company}
-												</p>
+
+											{/* Quote */}
+											<p
+												className="mb-5 flex-1 overflow-hidden"
+												style={{
+													fontFamily: 'var(--font-source-sans-3), sans-serif',
+													fontWeight: 400,
+													fontSize: '16px',
+													lineHeight: '160%',
+													letterSpacing: '0%',
+													color: '#E5E7EB',
+													display: '-webkit-box',
+													WebkitLineClamp: 7,
+													WebkitBoxOrient: 'vertical',
+													textOverflow: 'ellipsis',
+													overflow: 'hidden',
+												}}
+											>
+												{testimonial.quote}
+											</p>
+
+											{/* Author */}
+											<div className="flex items-center gap-4 mt-auto pt-2">
+												<div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-1 ring-white/10">
+													<Image
+														src={testimonial.avatar}
+														alt={testimonial.name}
+														width={40}
+														height={40}
+														className="w-full h-full object-cover"
+													/>
+												</div>
+												<div>
+													<p
+														className="mb-1"
+														style={{
+															fontFamily: 'var(--font-manrope), sans-serif',
+															fontWeight: 600,
+															fontSize: '14px',
+															lineHeight: '140%',
+															letterSpacing: '0%',
+															color: '#E5E7EB',
+														}}
+													>
+														{testimonial.name}
+													</p>
+													<p
+														style={{
+															fontFamily: 'var(--font-source-sans-3), sans-serif',
+															fontWeight: 400,
+															fontSize: '13px',
+															lineHeight: '140%',
+															letterSpacing: '0%',
+															color: '#9CA3AF',
+														}}
+													>
+														{testimonial.company}
+													</p>
+												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-							))}
+								))}
 							</motion.div>
 						</div>
 					</div>
+				</div>
 
-					{/* Mobile Carousel - full width */}
-					<div className="w-full lg:hidden overflow-hidden relative">
+				{/* Mobile Carousel - Separate from desktop */}
+				<div className="lg:hidden w-full px-4 mt-8">
+					<div className="w-full overflow-hidden">
 						<motion.div
-							className="flex gap-6"
+							className="flex"
 							animate={{
-								x: `-${currentIndex * 100}%`
+								x: getMobileTransform()
 							}}
 							transition={{
 								type: "tween",
@@ -288,16 +331,16 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 								width: `${testimonials.length * 100}%`
 							}}
 						>
-							{testimonials.map((testimonial, index) => (
+							{testimonials.map((testimonial) => (
 								<div
 									key={testimonial.id}
-									className="flex-shrink-0 flex justify-center"
+									className="flex-shrink-0 flex justify-center px-2"
 									style={{
-										width: '100%',
+										width: '100%'
 									}}
 								>
 									<div
-										className="rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden w-full"
+										className="rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden w-full max-w-full"
 										style={{
 											maxWidth: 398,
 											height: 224,
@@ -386,32 +429,35 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 				<div className="flex lg:hidden items-center justify-center gap-4 mt-8">
 					<button
 						onClick={prevSlide}
-						disabled={currentIndex === 0}
-						className="p-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+						disabled={isTransitioning}
+						className="p-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 disabled:hover:scale-100"
 						aria-label="Previous testimonial"
 					>
-						<LeftArrow color={currentIndex === 0 ? "#353845" : "#E5E7EB"} />
+						<LeftArrow color={isTransitioning ? "#353845" : "#E5E7EB"} />
 					</button>
 
 					<div className="flex items-center rounded-full">
-						{testimonials.map((_, index) => (
-							<button
-								key={index}
-								onClick={() => goToSlide(index)}
-								className={`h-0.5 transition-all ${index === currentIndex ? 'w-8 bg-white' : 'w-8 bg-white/30'
-									}`}
-								aria-label={`Go to testimonial ${index + 1}`}
-							/>
-						))}
+						{testimonials.map((_, index) => {
+							const actualIndex = currentIndex % testimonials.length
+							return (
+								<button
+									key={index}
+									onClick={() => goToSlide(index)}
+									className={`h-0.5 transition-all ${index === actualIndex ? 'w-8 bg-white' : 'w-8 bg-white/30'
+										}`}
+									aria-label={`Go to testimonial ${index + 1}`}
+								/>
+							)
+						})}
 					</div>
 
 					<button
 						onClick={nextSlide}
-						disabled={currentIndex >= maxIndex}
-						className="p-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+						disabled={isTransitioning}
+						className="p-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 disabled:hover:scale-100"
 						aria-label="Next testimonial"
 					>
-						<RightArrow color={currentIndex >= maxIndex ? "#353845" : "#E5E7EB"} />
+						<RightArrow color={isTransitioning ? "#353845" : "#E5E7EB"} />
 					</button>
 				</div>
 			</div>

@@ -112,7 +112,9 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 
 	// Mobile transform - simple percentage based
 	const getMobileTransform = () => {
-		return `-${ITEM_WIDTH * currentIndex}px`
+		if (!testimonials.length) return '0%'
+		// Move exactly one slide width (100% / total slides) per step on mobile
+		return `-${(100 / testimonials.length) * currentIndex}%`
 	}
 
 	return (
@@ -219,14 +221,14 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 									}
 								}}
 							>
-							{infiniteTestimonials.map((testimonial, index) => (
-								<div
-									key={`testimonial-${index}-${testimonial.id}`}
-									className="flex-shrink-0 flex justify-center"
-									style={{
-										width: `${ITEM_WIDTH}px`, // Exact item width including gap
-									}}
-								>
+								{infiniteTestimonials.map((testimonial, index) => (
+									<div
+										key={`testimonial-${index}-${testimonial.id}`}
+										className="flex-shrink-0 flex justify-center"
+										style={{
+											width: `${ITEM_WIDTH}px`, // Exact item width including gap
+										}}
+									>
 										<div
 											className="rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden w-full"
 											style={{
@@ -336,7 +338,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 									key={testimonial.id}
 									className="flex-shrink-0 flex justify-center px-2"
 									style={{
-										width: '100%'
+										width: `${100 / testimonials.length}%`
 									}}
 								>
 									<div

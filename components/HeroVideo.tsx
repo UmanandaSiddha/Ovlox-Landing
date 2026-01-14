@@ -95,6 +95,10 @@ export default function HeroVideo() {
         }
     }
 
+    const handleContainerClick = () => {
+        togglePlay()
+    }
+
     const toggleMute = () => {
         const video = videoRef.current
         if (!video) return
@@ -122,6 +126,7 @@ export default function HeroVideo() {
         <div
             className="relative w-full rounded-lg overflow-hidden bg-black group"
             style={{ aspectRatio: "16 / 9" }}
+            onClick={handleContainerClick}
         >
             {!ready && (
                 <img
@@ -145,7 +150,10 @@ export default function HeroVideo() {
                     <div className="flex items-center gap-4 sm:gap-6">
                         {/* Play/Pause Button */}
                         <button
-                            onClick={togglePlay}
+                            onClick={(event) => {
+                                event.stopPropagation()
+                                togglePlay()
+                            }}
                             className="flex items-center justify-center transition-all duration-300 hover:scale-110"
                             aria-label={isPlaying ? "Pause" : "Play"}
                         >
@@ -158,7 +166,10 @@ export default function HeroVideo() {
 
                         {/* Mute/Unmute Button */}
                         <button
-                            onClick={toggleMute}
+                            onClick={(event) => {
+                                event.stopPropagation()
+                                toggleMute()
+                            }}
                             className="flex items-center justify-center transition-all duration-300 hover:scale-110"
                             aria-label={isMuted ? "Unmute" : "Mute"}
                         >
@@ -172,7 +183,10 @@ export default function HeroVideo() {
 
                     {/* Fullscreen Button - Extreme Right */}
                     <button
-                        onClick={toggleFullscreen}
+                        onClick={(event) => {
+                            event.stopPropagation()
+                            toggleFullscreen()
+                        }}
                         className="flex items-center justify-center transition-all duration-300 hover:scale-110"
                         aria-label="Fullscreen"
                     >

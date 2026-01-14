@@ -140,33 +140,76 @@ export default function StickyVideoController() {
 
     // Sync video states between sticky and section videos
     useEffect(() => {
+        let isSyncing = false
+
         const syncVideos = () => {
             const stickyVideo = document.querySelector('#sticky-video video') as HTMLVideoElement
             const sectionVideo = document.querySelector('#video-section-actual video') as HTMLVideoElement
 
-            if (!stickyVideo || !sectionVideo) return
+            if (!stickyVideo || !sectionVideo || isSyncing) return
 
-            // Sync section → sticky when sticky is visible
+            // Bidirectional sync when sticky is visible
             if (isInStickyMode && !isDismissed) {
-                // Sync playback position
-                if (Math.abs(stickyVideo.currentTime - sectionVideo.currentTime) > 0.5) {
+                // Always mute sticky video to prevent audio echo
+                stickyVideo.muted = true
+
+                // Sync playback position (use section as source of truth)
+                if (Math.abs(stickyVideo.currentTime - sectionVideo.currentTime) > 0.3) {
                     stickyVideo.currentTime = sectionVideo.currentTime
                 }
+
                 // Sync play/pause state
                 if (!sectionVideo.paused && stickyVideo.paused) {
                     stickyVideo.play().catch(() => { })
                 } else if (sectionVideo.paused && !stickyVideo.paused) {
                     stickyVideo.pause()
                 }
-                // Sync volume and mute
-                stickyVideo.volume = sectionVideo.volume
-                stickyVideo.muted = sectionVideo.muted
+            }
+        }
+
+        // Set up bidirectional event listeners for play/pause
+        const setupEventListeners = () => {
+            const stickyVideo = document.querySelector('#sticky-video video') as HTMLVideoElement
+            const sectionVideo = document.querySelector('#video-section-actual video') as HTMLVideoElement
+
+            if (!stickyVideo || !sectionVideo) return null
+
+            const onStickyPlay = () => {
+                if (!isSyncing && sectionVideo.paused) {
+                    isSyncing = true
+                    sectionVideo.play().catch(() => { })
+                    setTimeout(() => isSyncing = false, 200)
+                }
+            }
+
+            const onStickyPause = () => {
+                if (!isSyncing && !sectionVideo.paused) {
+                    isSyncing = true
+                    sectionVideo.pause()
+                    setTimeout(() => isSyncing = false, 200)
+                }
+            }
+
+            stickyVideo.addEventListener('play', onStickyPlay)
+            stickyVideo.addEventListener('pause', onStickyPause)
+
+            return () => {
+                stickyVideo.removeEventListener('play', onStickyPlay)
+                stickyVideo.removeEventListener('pause', onStickyPause)
             }
         }
 
         // Sync continuously while sticky video is active
         if (isInStickyMode && !isDismissed) {
             syncIntervalRef.current = setInterval(syncVideos, 100)
+            const cleanup = setupEventListeners()
+
+            return () => {
+                if (syncIntervalRef.current) {
+                    clearInterval(syncIntervalRef.current)
+                }
+                if (cleanup) cleanup()
+            }
         }
 
         return () => {

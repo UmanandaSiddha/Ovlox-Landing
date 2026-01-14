@@ -11,6 +11,7 @@ export default function StickyVideoController() {
     const videoRef = useRef<HTMLDivElement>(null)
     const lastScrollY = useRef<number>(typeof window !== 'undefined' ? window.scrollY : 0)
     const scrollDir = useRef<'down' | 'up'>('down')
+    const syncIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
     // Sticky video dimensions (bottom-right corner)
     const stickyWidth = 320
@@ -137,6 +138,44 @@ export default function StickyVideoController() {
         targetRect.bottom < 320
     )
 
+    // Sync video states between sticky and section videos
+    useEffect(() => {
+        const syncVideos = () => {
+            const stickyVideo = document.querySelector('#sticky-video video') as HTMLVideoElement
+            const sectionVideo = document.querySelector('#video-section-actual video') as HTMLVideoElement
+
+            if (!stickyVideo || !sectionVideo) return
+
+            // Sync section → sticky when sticky is visible
+            if (isInStickyMode && !isDismissed) {
+                // Sync playback position
+                if (Math.abs(stickyVideo.currentTime - sectionVideo.currentTime) > 0.5) {
+                    stickyVideo.currentTime = sectionVideo.currentTime
+                }
+                // Sync play/pause state
+                if (!sectionVideo.paused && stickyVideo.paused) {
+                    stickyVideo.play().catch(() => { })
+                } else if (sectionVideo.paused && !stickyVideo.paused) {
+                    stickyVideo.pause()
+                }
+                // Sync volume and mute
+                stickyVideo.volume = sectionVideo.volume
+                stickyVideo.muted = sectionVideo.muted
+            }
+        }
+
+        // Sync continuously while sticky video is active
+        if (isInStickyMode && !isDismissed) {
+            syncIntervalRef.current = setInterval(syncVideos, 100)
+        }
+
+        return () => {
+            if (syncIntervalRef.current) {
+                clearInterval(syncIntervalRef.current)
+            }
+        }
+    }, [isInStickyMode, isDismissed])
+
     const handleDismiss = () => {
         setIsDismissed(true)
         // Pause both sticky video and section video when dismissed
@@ -157,7 +196,21 @@ export default function StickyVideoController() {
             if (videoSection) {
                 const videoElement = videoSection.querySelector('video') as HTMLVideoElement
                 if (videoElement) {
-                    const handlePlay = () => setIsDismissed(false)
+                    const handlePlay = () => {
+                        setIsDismissed(false)
+                        // Sync the sticky video immediately when re-enabled
+                        setTimeout(() => {
+                            const stickyVideo = document.querySelector('#sticky-video video') as HTMLVideoElement
+                            if (stickyVideo && videoElement) {
+                                stickyVideo.currentTime = videoElement.currentTime
+                                stickyVideo.volume = videoElement.volume
+                                stickyVideo.muted = videoElement.muted
+                                if (!videoElement.paused) {
+                                    stickyVideo.play().catch(() => { })
+                                }
+                            }
+                        }, 100)
+                    }
                     videoElement.addEventListener('play', handlePlay)
                     return () => videoElement.removeEventListener('play', handlePlay)
                 }

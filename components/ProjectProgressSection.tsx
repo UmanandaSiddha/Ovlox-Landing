@@ -3,7 +3,25 @@
 import AnimatedGradient from "@/components/AnimatedGradient"
 import HeroVideo from "./HeroVideo"
 
-export default function ProjectProgressSection() {
+interface ProjectProgressSectionProps {
+	videoRef: React.RefObject<HTMLVideoElement | null>
+	isPlaying: boolean
+	setIsPlaying: (playing: boolean) => void
+	isMuted: boolean
+	setIsMuted: (muted: boolean) => void
+	volume: number
+	setVolume: (volume: number) => void
+}
+
+export default function ProjectProgressSection({
+	videoRef,
+	isPlaying,
+	setIsPlaying,
+	isMuted,
+	setIsMuted,
+	volume,
+	setVolume,
+}: ProjectProgressSectionProps) {
 	return (
 		<section className="relative py-16 sm:py-20 overflow-hidden">
 			{/* Animated Gradient Background */}
@@ -44,7 +62,15 @@ export default function ProjectProgressSection() {
 				{/* Video */}
 				<div id="video-section" className="mb-16 rounded-lg overflow-hidden border border-[#60CAF9]/30">
 					<div id="video-section-actual">
-						<HeroVideo />
+						<HeroVideo
+							videoRef={videoRef}
+							isPlaying={isPlaying}
+							setIsPlaying={setIsPlaying}
+							isMuted={isMuted}
+							setIsMuted={setIsMuted}
+							volume={volume}
+							setVolume={setVolume}
+						/>
 					</div>
 				</div>
 

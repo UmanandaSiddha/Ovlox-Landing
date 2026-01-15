@@ -1,98 +1,128 @@
 'use client'
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, forwardRef } from "react"
 import Image from "next/image"
-import Hls from "hls.js"
 import { PauseIcon, ResizeIcon, ResumeIcon, VolumeDownIcon, VolumeUpIcon } from "@/assets"
 
-export default function HeroVideo() {
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const [ready, setReady] = useState(false)
-    const [isPlaying, setIsPlaying] = useState(false)
-    const [isMuted, setIsMuted] = useState(false)
-    const [volume, setVolume] = useState(1)
+interface HeroVideoProps {
+    videoRef: React.RefObject<HTMLVideoElement | null>
+    isPlaying: boolean
+    setIsPlaying: (playing: boolean) => void
+    isMuted: boolean
+    setIsMuted: (muted: boolean) => void
+    volume: number
+    setVolume: (volume: number) => void
+}
 
-    const HLS_URL = "https://dy7x01gt6ljdu.cloudfront.net/videos/intro/intro.m3u8";
+export default function HeroVideo({
+    videoRef,
+    isPlaying,
+    setIsPlaying,
+    isMuted,
+    setIsMuted,
+    volume,
+    setVolume,
+}: HeroVideoProps) {
+    const [showControls, setShowControls] = useState(false)
+    const [actualMuted, setActualMuted] = useState(true)
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const isMobileRef = useRef(false)
+    const containerRef = useRef<HTMLDivElement>(null)
 
+    // Detect mobile
+    useEffect(() => {
+        const checkMobile = () => {
+            isMobileRef.current = window.innerWidth < 768
+        }
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
+    // Update actual muted state from video element
     useEffect(() => {
         const video = videoRef.current
         if (!video) return
 
-        // Autoplay with sound (browsers may still block this)
-        video.muted = false
-        video.volume = 1
-        video.playsInline = true
-
-        // ✅ Safari (native HLS)
-        if (video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = HLS_URL
-
-            video.addEventListener("loadedmetadata", () => {
-                video.play().then(() => {
-                    setIsPlaying(true)
-                    setIsMuted(false)
-                }).catch(() => {
-                    // If autoplay with sound fails, try muted (browser policy)
-                    video.muted = true
-                    setIsMuted(true)
-                    video.play().then(() => {
-                        setIsPlaying(true)
-                    }).catch(() => {
-                        setIsPlaying(false)
-                    })
-                })
-                setReady(true)
-            })
-
-            video.addEventListener("play", () => setIsPlaying(true))
-            video.addEventListener("pause", () => setIsPlaying(false))
-            video.addEventListener("volumechange", () => {
-                setIsMuted(video.muted)
-                setVolume(video.volume)
-            })
-
-            return
+        const updateMutedState = () => {
+            setActualMuted(video.muted)
         }
 
-        // ✅ Chrome / Edge / Firefox
-        if (Hls.isSupported()) {
-            const hls = new Hls({
-                lowLatencyMode: true,
-                backBufferLength: 30,
-            })
+        updateMutedState()
+        video.addEventListener('volumechange', updateMutedState)
 
-            hls.loadSource(HLS_URL)
-            hls.attachMedia(video)
-
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play().then(() => {
-                    setIsPlaying(true)
-                    setIsMuted(false)
-                }).catch(() => {
-                    // If autoplay with sound fails, try muted (browser policy)
-                    video.muted = true
-                    setIsMuted(true)
-                    video.play().then(() => {
-                        setIsPlaying(true)
-                    }).catch(() => {
-                        setIsPlaying(false)
-                    })
-                })
-                setReady(true)
-            })
-
-            video.addEventListener("play", () => setIsPlaying(true))
-            video.addEventListener("pause", () => setIsPlaying(false))
-            video.addEventListener("volumechange", () => {
-                setIsMuted(video.muted)
-                setVolume(video.volume)
-            })
-
-            return () => hls.destroy()
+        return () => {
+            video.removeEventListener('volumechange', updateMutedState)
         }
+    }, [videoRef])
 
-        console.warn("HLS not supported in this browser")
-    }, [])
+    // Draw video frame to canvas continuously
+    useEffect(() => {
+        const video = videoRef.current
+        const canvas = containerRef.current?.querySelector('canvas') as HTMLCanvasElement
+
+        if (!video || !canvas) return
+
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+
+        // Set canvas size to match container
+        const updateCanvasSize = () => {
+            canvas.width = containerRef.current?.offsetWidth || 320
+            canvas.height = containerRef.current?.offsetHeight || 180
+        }
+        updateCanvasSize()
+
+        // Draw video frame to canvas continuously
+        let animationId: number
+        const drawFrame = () => {
+            if (video.readyState >= 2) { // HAVE_CURRENT_DATA
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+            }
+            animationId = requestAnimationFrame(drawFrame)
+        }
+        drawFrame()
+
+        window.addEventListener('resize', updateCanvasSize)
+
+        return () => {
+            cancelAnimationFrame(animationId)
+            window.removeEventListener('resize', updateCanvasSize)
+        }
+    }, [videoRef])
+
+    // Mobile: Auto-play when ProjectProgressSection scrolls into view
+    useEffect(() => {
+        if (!isMobileRef.current) return
+
+        const videoSection = document.getElementById('video-section')
+        if (!videoSection) return
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        // Section is in view - try to play video
+                        const video = videoRef.current
+                        if (video && video.paused) {
+                            video.play().catch(() => {
+                                // Autoplay blocked, will be triggered by user interaction
+                            })
+                        }
+                    }
+                })
+            },
+            { threshold: 0.5 }
+        )
+
+        observer.observe(videoSection)
+
+        return () => {
+            if (videoSection) {
+                observer.unobserve(videoSection)
+            }
+        }
+    }, [videoRef])
 
     const togglePlay = () => {
         const video = videoRef.current
@@ -100,31 +130,48 @@ export default function HeroVideo() {
 
         if (video.paused) {
             video.play()
+            setIsPlaying(true)
         } else {
             video.pause()
+            setIsPlaying(false)
         }
     }
 
     const handleContainerClick = () => {
-        togglePlay()
+        if (isMobileRef.current) {
+            // On mobile, show controls and hide after 3 seconds
+            setShowControls(true)
+            if (controlsTimeoutRef.current) {
+                clearTimeout(controlsTimeoutRef.current)
+            }
+            controlsTimeoutRef.current = setTimeout(() => {
+                setShowControls(false)
+            }, 3000)
+        } else {
+            // On desktop, toggle play/pause
+            togglePlay()
+        }
     }
 
     const toggleMute = () => {
         const video = videoRef.current
         if (!video) return
 
-        video.muted = !video.muted
-        if (!video.muted) {
+        const newMutedState = !video.muted
+        video.muted = newMutedState
+        setIsMuted(newMutedState)
+        if (!newMutedState) {
             video.volume = volume || 0.5
+            setVolume(video.volume)
         }
     }
 
     const toggleFullscreen = () => {
-        const video = videoRef.current
-        if (!video) return
+        const container = containerRef.current
+        if (!container) return
 
         if (!document.fullscreenElement) {
-            video.requestFullscreen().catch(() => {
+            container.requestFullscreen().catch(() => {
                 console.warn("Fullscreen not supported")
             })
         } else {
@@ -132,31 +179,55 @@ export default function HeroVideo() {
         }
     }
 
+    const handleMouseEnter = () => {
+        if (!isMobileRef.current) {
+            setShowControls(true)
+            // Clear any timeout that might hide controls
+            if (controlsTimeoutRef.current) {
+                clearTimeout(controlsTimeoutRef.current)
+                controlsTimeoutRef.current = null
+            }
+        }
+    }
+
+    const handleMouseLeave = () => {
+        if (!isMobileRef.current) {
+            setShowControls(false)
+        }
+    }
+
     return (
         <div
-            className="relative w-full rounded-lg overflow-hidden bg-black group"
+            ref={containerRef}
+            className="relative w-full rounded-lg overflow-hidden bg-black"
             style={{ aspectRatio: "16 / 9" }}
             onClick={handleContainerClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
-            {!ready && (
-                <img
-                    src="/video-output/intro-poster.jpg"
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
-            )}
+            {/* Poster image fallback - shown behind canvas */}
+            <img
+                src="https://dy7x01gt6ljdu.cloudfront.net/videos/intro/intro-poster.jpg"
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover z-0"
+            />
 
-            <video
-                ref={videoRef}
-                loop
-                preload="metadata"
-                poster="/video-output/intro-poster.jpg"
-                className="w-full h-full object-cover"
+            {/* Display video frame using canvas to avoid moving DOM element */}
+            <canvas
+                className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'block'
+                }}
             />
 
             {/* Custom Controls */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="flex items-center justify-between">
+            <div
+                className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 pointer-events-none z-20 ${showControls ? 'opacity-100' : 'opacity-0'
+                    }`}
+            >
+                <div className="flex items-center justify-between pointer-events-auto">
                     <div className="flex items-center gap-4 sm:gap-6">
                         {/* Play/Pause Button */}
                         <button
@@ -181,9 +252,9 @@ export default function HeroVideo() {
                                 toggleMute()
                             }}
                             className="flex items-center justify-center transition-all duration-300 hover:scale-110"
-                            aria-label={isMuted ? "Unmute" : "Mute"}
+                            aria-label={actualMuted || isMuted || volume === 0 ? "Unmute" : "Mute"}
                         >
-                            {isMuted || volume === 0 ? (
+                            {(actualMuted || isMuted || volume === 0) ? (
                                 <Image src={VolumeDownIcon} alt="Muted" width={32} height={32} className="w-6 h-6" />
                             ) : (
                                 <Image src={VolumeUpIcon} alt="Unmuted" width={32} height={32} className="w-6 h-6" />

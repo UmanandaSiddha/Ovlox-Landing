@@ -102,14 +102,40 @@ export default function HeroSection() {
 							{/* Buttons */}
 							<div className="mt-12 sm:mt-16 lg:mt-24 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-4 lg:gap-6 w-full max-w-md sm:max-w-none px-2">
 								<a
-									href="#"
+									href="#about"
+									onClick={(e) => {
+										e.preventDefault()
+										const targetElement = document.getElementById('about')
+										if (targetElement) {
+											const headerOffset = 80
+											const elementPosition = targetElement.getBoundingClientRect().top
+											const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+											window.scrollTo({
+												top: offsetPosition,
+												behavior: 'smooth'
+											})
+										}
+									}}
 									className="w-full sm:w-auto sm:flex-none rounded-full px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-base xl:text-lg font-semibold text-black shadow-lg hover:scale-105 hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#60CAF9] transition-all duration-300 text-center"
 									style={{ background: 'linear-gradient(to right, #38BDF8, #60CAF9)' }}
 								>
 									See it in Action
 								</a>
 								<a
-									href="#"
+									href="#contact"
+									onClick={(e) => {
+										e.preventDefault()
+										const targetElement = document.getElementById('contact')
+										if (targetElement) {
+											const headerOffset = 80
+											const elementPosition = targetElement.getBoundingClientRect().top
+											const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+											window.scrollTo({
+												top: offsetPosition,
+												behavior: 'smooth'
+											})
+										}
+									}}
 									className="w-full sm:w-auto sm:flex-none rounded-full border-2 border-[#60CAF9] px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-base xl:text-lg font-semibold text-white hover:scale-105 hover:bg-[#60CAF9]/10 hover:shadow-[0_0_20px_rgba(96,202,249,0.4)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#60CAF9] transition-all duration-300 text-center"
 								>
 									Book a Demo

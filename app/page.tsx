@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
+import Hls from "hls.js"
 import { motion, useInView, useReducedMotion } from "framer-motion"
 import Header from "@/components/Header"
 import HeroSection from "@/components/HeroSection"
@@ -11,6 +12,9 @@ import TestimonialsSection from "@/components/TestimonialsSection"
 import WaitlistSection from "@/components/WaitlistSection"
 import Footer from "@/components/Footer"
 import StickyVideoController from "@/components/StickyVideoController"
+
+const HLS_URL = "https://dy7x01gt6ljdu.cloudfront.net/videos/intro/intro.m3u8"
+let unmutedRef = { current: false }
 
 const testimonials = [
 	{
@@ -90,22 +94,190 @@ function AnimatedSection({ children, className = "", delay = 0 }: { children: Re
 }
 
 export default function Home() {
+	// Single shared video ref and state
+	const videoRef = useRef<HTMLVideoElement>(null)
+	const [isPlaying, setIsPlaying] = useState(false)
+	const [isMuted, setIsMuted] = useState(true)
+	const [volume, setVolume] = useState(1)
+	const [currentTime, setCurrentTime] = useState(0)
+	const [duration, setDuration] = useState(0)
+
+	// Initialize HLS on video element
+	useEffect(() => {
+		const video = videoRef.current
+		if (!video) return
+
+		// Setup video element
+		video.muted = true
+		video.volume = 1
+		video.playsInline = true
+
+		// ✅ Safari (native HLS)
+		if (video.canPlayType("application/vnd.apple.mpegurl")) {
+			video.src = HLS_URL
+
+			const handleLoadedMetadata = () => {
+				video.play().then(() => {
+					setIsPlaying(true)
+					setIsMuted(false)
+				}).catch(() => {
+					// If autoplay with sound fails, try muted (browser policy)
+					video.muted = true
+					setIsMuted(true)
+					video.play().then(() => {
+						setIsPlaying(true)
+						// Try to unmute after delay
+						setTimeout(() => {
+							if (!unmutedRef.current) {
+								video.muted = false
+								setIsMuted(false)
+								unmutedRef.current = true
+							}
+						}, 1000)
+					}).catch(() => {
+						setIsPlaying(false)
+					})
+				})
+			}
+
+			const handlePlay = () => setIsPlaying(true)
+			const handlePause = () => setIsPlaying(false)
+			const handleTimeUpdate = () => setCurrentTime(video.currentTime)
+			const handleDurationChange = () => setDuration(video.duration)
+			const handleVolumeChange = () => {
+				setIsMuted(video.muted)
+				setVolume(video.volume)
+			}
+
+			video.addEventListener("loadedmetadata", handleLoadedMetadata)
+			video.addEventListener("play", handlePlay)
+			video.addEventListener("pause", handlePause)
+			video.addEventListener("timeupdate", handleTimeUpdate)
+			video.addEventListener("durationchange", handleDurationChange)
+			video.addEventListener("volumechange", handleVolumeChange)
+
+			return () => {
+				video.removeEventListener("loadedmetadata", handleLoadedMetadata)
+				video.removeEventListener("play", handlePlay)
+				video.removeEventListener("pause", handlePause)
+				video.removeEventListener("timeupdate", handleTimeUpdate)
+				video.removeEventListener("durationchange", handleDurationChange)
+				video.removeEventListener("volumechange", handleVolumeChange)
+			}
+		}
+
+		// ✅ Chrome / Edge / Firefox
+		if (Hls.isSupported()) {
+			const hls = new Hls({
+				lowLatencyMode: true,
+				backBufferLength: 30,
+			})
+
+			hls.loadSource(HLS_URL)
+			hls.attachMedia(video)
+
+			const handleManifestParsed = () => {
+				video.play().then(() => {
+					setIsPlaying(true)
+					setIsMuted(false)
+				}).catch(() => {
+					// If autoplay with sound fails, try muted (browser policy)
+					video.muted = true
+					setIsMuted(true)
+					video.play().then(() => {
+						setIsPlaying(true)
+						// Try to unmute after delay
+						setTimeout(() => {
+							if (!unmutedRef.current) {
+								video.muted = false
+								setIsMuted(false)
+								unmutedRef.current = true
+							}
+						}, 1000)
+					}).catch(() => {
+						setIsPlaying(false)
+					})
+				})
+			}
+
+			hls.on(Hls.Events.MANIFEST_PARSED, handleManifestParsed)
+
+			const handlePlay = () => setIsPlaying(true)
+			const handlePause = () => setIsPlaying(false)
+			const handleTimeUpdate = () => setCurrentTime(video.currentTime)
+			const handleDurationChange = () => setDuration(video.duration)
+			const handleVolumeChange = () => {
+				setIsMuted(video.muted)
+				setVolume(video.volume)
+			}
+
+			video.addEventListener("play", handlePlay)
+			video.addEventListener("pause", handlePause)
+			video.addEventListener("timeupdate", handleTimeUpdate)
+			video.addEventListener("durationchange", handleDurationChange)
+			video.addEventListener("volumechange", handleVolumeChange)
+
+			return () => {
+				hls.off(Hls.Events.MANIFEST_PARSED, handleManifestParsed)
+				video.removeEventListener("play", handlePlay)
+				video.removeEventListener("pause", handlePause)
+				video.removeEventListener("timeupdate", handleTimeUpdate)
+				video.removeEventListener("durationchange", handleDurationChange)
+				video.removeEventListener("volumechange", handleVolumeChange)
+				hls.destroy()
+			}
+		}
+
+		console.warn("HLS not supported in this browser")
+	}, [])
+
+	const videoProps = {
+		videoRef,
+		isPlaying,
+		setIsPlaying,
+		isMuted,
+		setIsMuted,
+		volume,
+		setVolume,
+	}
 
 	return (
 		<div className="bg-[#020617] min-h-screen w-full">
+			{/* Hidden video element at page root */}
+			<video
+				ref={videoRef}
+				loop
+				preload="metadata"
+				poster="https://dy7x01gt6ljdu.cloudfront.net/videos/intro/intro-poster.jpg"
+				style={{
+					position: 'absolute',
+					top: '-9999px',
+					left: '-9999px',
+					width: '1px',
+					height: '1px',
+					visibility: 'hidden'
+				}}
+			/>
+
 			<Header />
-			<StickyVideoController />
+			<StickyVideoController {...videoProps} />
 
 			{/* Hero Section - No animation, appears immediately */}
-			<HeroSection />
+			<section id="home">
+				<HeroSection />
+			</section>
 
 			{/* Animated Sections with subtle staggered delays */}
 			<AnimatedSection delay={0.1}>
-				<ProjectProgressSection />
+				<section id="about">
+					<ProjectProgressSection {...videoProps} />
+				</section>
 			</AnimatedSection>
 
 			<AnimatedSection delay={0.15}>
-				<EverythingYouNeedSection />
+				<section id="features">
+					<EverythingYouNeedSection />
+				</section>
 			</AnimatedSection>
 
 			<AnimatedSection delay={0.1}>
@@ -117,7 +289,9 @@ export default function Home() {
 			</AnimatedSection>
 
 			<AnimatedSection delay={0.1}>
-				<WaitlistSection />
+				<section id="contact">
+					<WaitlistSection />
+				</section>
 			</AnimatedSection>
 
 			<AnimatedSection delay={0.05}>

@@ -4,14 +4,31 @@ import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import HeroVideo from "./HeroVideo"
 
-export default function StickyVideoController() {
+interface StickyVideoControllerProps {
+    videoRef: React.RefObject<HTMLVideoElement | null>
+    isPlaying: boolean
+    setIsPlaying: (playing: boolean) => void
+    isMuted: boolean
+    setIsMuted: (muted: boolean) => void
+    volume: number
+    setVolume: (volume: number) => void
+}
+
+export default function StickyVideoController({
+    videoRef,
+    isPlaying,
+    setIsPlaying,
+    isMuted,
+    setIsMuted,
+    volume,
+    setVolume,
+}: StickyVideoControllerProps) {
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
     const [isDismissed, setIsDismissed] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
-    const videoRef = useRef<HTMLDivElement>(null)
+    const stickyVideoRef = useRef<HTMLDivElement>(null)
     const lastScrollY = useRef<number>(typeof window !== 'undefined' ? window.scrollY : 0)
     const scrollDir = useRef<'down' | 'up'>('down')
-    const syncIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
     // Sticky video dimensions (bottom-right corner)
     const stickyWidth = 320
@@ -132,134 +149,68 @@ export default function StickyVideoController() {
 
     const transform = getVideoTransform()
 
-    // Determine if video should be in sticky mode (small at corner)
-    const isInStickyMode = !isMobile && !isDismissed && targetRect && (
+    // Determine if video section should be in sticky mode (regardless of dismissed state)
+    const shouldBeSticky = !isMobile && targetRect && (
         targetRect.top > (typeof window !== 'undefined' ? window.innerHeight : 800) - 320 ||
         targetRect.bottom < 320
     )
 
-    // Sync video states between sticky and section videos
-    useEffect(() => {
-        let isSyncing = false
-
-        const syncVideos = () => {
-            const stickyVideo = document.querySelector('#sticky-video video') as HTMLVideoElement
-            const sectionVideo = document.querySelector('#video-section-actual video') as HTMLVideoElement
-
-            if (!stickyVideo || !sectionVideo || isSyncing) return
-
-            // Bidirectional sync when sticky is visible
-            if (isInStickyMode && !isDismissed) {
-                // Always mute sticky video to prevent audio echo
-                stickyVideo.muted = true
-
-                // Sync playback position (use section as source of truth)
-                if (Math.abs(stickyVideo.currentTime - sectionVideo.currentTime) > 0.3) {
-                    stickyVideo.currentTime = sectionVideo.currentTime
-                }
-
-                // Sync play/pause state
-                if (!sectionVideo.paused && stickyVideo.paused) {
-                    stickyVideo.play().catch(() => { })
-                } else if (sectionVideo.paused && !stickyVideo.paused) {
-                    stickyVideo.pause()
-                }
-            }
-        }
-
-        // Set up bidirectional event listeners for play/pause
-        const setupEventListeners = () => {
-            const stickyVideo = document.querySelector('#sticky-video video') as HTMLVideoElement
-            const sectionVideo = document.querySelector('#video-section-actual video') as HTMLVideoElement
-
-            if (!stickyVideo || !sectionVideo) return null
-
-            const onStickyPlay = () => {
-                if (!isSyncing && sectionVideo.paused) {
-                    isSyncing = true
-                    sectionVideo.play().catch(() => { })
-                    setTimeout(() => isSyncing = false, 200)
-                }
-            }
-
-            const onStickyPause = () => {
-                if (!isSyncing && !sectionVideo.paused) {
-                    isSyncing = true
-                    sectionVideo.pause()
-                    setTimeout(() => isSyncing = false, 200)
-                }
-            }
-
-            stickyVideo.addEventListener('play', onStickyPlay)
-            stickyVideo.addEventListener('pause', onStickyPause)
-
-            return () => {
-                stickyVideo.removeEventListener('play', onStickyPlay)
-                stickyVideo.removeEventListener('pause', onStickyPause)
-            }
-        }
-
-        // Sync continuously while sticky video is active
-        if (isInStickyMode && !isDismissed) {
-            syncIntervalRef.current = setInterval(syncVideos, 100)
-            const cleanup = setupEventListeners()
-
-            return () => {
-                if (syncIntervalRef.current) {
-                    clearInterval(syncIntervalRef.current)
-                }
-                if (cleanup) cleanup()
-            }
-        }
-
-        return () => {
-            if (syncIntervalRef.current) {
-                clearInterval(syncIntervalRef.current)
-            }
-        }
-    }, [isInStickyMode, isDismissed])
+    // Determine if video should be in sticky mode (small at corner)
+    const isInStickyMode = shouldBeSticky && !isDismissed
 
     const handleDismiss = () => {
         setIsDismissed(true)
-        // Pause both sticky video and section video when dismissed
-        const stickyVideoElement = document.querySelector('#sticky-video video') as HTMLVideoElement
-        if (stickyVideoElement) {
-            stickyVideoElement.pause()
-        }
-        const sectionVideoElement = document.querySelector('#video-section-actual video') as HTMLVideoElement
-        if (sectionVideoElement) {
-            sectionVideoElement.pause()
+        // Pause the video when sticky is dismissed
+        if (videoRef.current) {
+            videoRef.current.pause()
+            setIsPlaying(false)
         }
     }
 
-    // Re-enable sticky when user plays the video in the section
+    // Re-enable sticky when video section should be sticky AND video is playing
     useEffect(() => {
-        if (isDismissed) {
-            const videoSection = document.getElementById('video-section-actual')
-            if (videoSection) {
-                const videoElement = videoSection.querySelector('video') as HTMLVideoElement
-                if (videoElement) {
-                    const handlePlay = () => {
+        // If video is playing and section should be sticky, reset dismissed state
+        if (isDismissed && shouldBeSticky && isPlaying && videoRef.current && !videoRef.current.paused) {
+            setIsDismissed(false)
+        }
+    }, [isDismissed, shouldBeSticky, isPlaying, targetRect])
+
+    // Also re-enable sticky when user plays the video in the section
+    useEffect(() => {
+        if (isDismissed && videoRef.current) {
+            const video = videoRef.current
+            
+            const handlePlay = () => {
+                // When video plays, reset dismissed state so sticky can reappear on scroll
+                // Small delay to ensure state is updated
+                setTimeout(() => {
+                    if (shouldBeSticky && !video.paused) {
                         setIsDismissed(false)
-                        // Sync the sticky video immediately when re-enabled
-                        setTimeout(() => {
-                            const stickyVideo = document.querySelector('#sticky-video video') as HTMLVideoElement
-                            if (stickyVideo && videoElement) {
-                                stickyVideo.currentTime = videoElement.currentTime
-                                stickyVideo.volume = videoElement.volume
-                                stickyVideo.muted = videoElement.muted
-                                if (!videoElement.paused) {
-                                    stickyVideo.play().catch(() => { })
-                                }
-                            }
-                        }, 100)
                     }
-                    videoElement.addEventListener('play', handlePlay)
-                    return () => videoElement.removeEventListener('play', handlePlay)
+                }, 100)
+            }
+            
+            const handlePlaying = () => {
+                // Also listen to 'playing' event to catch when video actually starts playing
+                if (shouldBeSticky && !video.paused) {
+                    setIsDismissed(false)
                 }
             }
+
+            video.addEventListener('play', handlePlay)
+            video.addEventListener('playing', handlePlaying)
+            
+            // Also check if video is already playing
+            if (!video.paused && shouldBeSticky) {
+                setIsDismissed(false)
+            }
+            
+            return () => {
+                video.removeEventListener('play', handlePlay)
+                video.removeEventListener('playing', handlePlaying)
+            }
         }
-    }, [isDismissed])
+    }, [isDismissed, shouldBeSticky, videoRef])
 
     // Don't render sticky video on mobile or when dismissed
     if (isMobile || isDismissed) {
@@ -271,7 +222,7 @@ export default function StickyVideoController() {
             {isInStickyMode && (
                 <motion.div
                     id="sticky-video"
-                    ref={videoRef}
+                    ref={stickyVideoRef}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
@@ -290,7 +241,15 @@ export default function StickyVideoController() {
                         mass: 0.5,
                     }}
                 >
-                    <HeroVideo />
+                    <HeroVideo
+                        videoRef={videoRef}
+                        isPlaying={isPlaying}
+                        setIsPlaying={setIsPlaying}
+                        isMuted={isMuted}
+                        setIsMuted={setIsMuted}
+                        volume={volume}
+                        setVolume={setVolume}
+                    />
 
                     {/* Close button - only show when in sticky corner mode */}
                     {(transform.width === 320) && (

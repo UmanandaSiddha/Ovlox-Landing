@@ -3,7 +3,7 @@
 import Image from "next/image"
 import AnimatedGradient from "@/components/AnimatedGradient"
 import { ovloxFooterLogo } from "@/assets"
-import { SiX, SiFacebook, SiInstagram } from "react-icons/si"
+import { SiFacebook, SiInstagram } from "react-icons/si"
 
 export default function Footer() {
 	return (
@@ -19,21 +19,18 @@ export default function Footer() {
 							<Image src={ovloxFooterLogo} alt="Ovlox Logo" width={120} height={120} />
 							<div className="flex items-center gap-2">
 								<a
-									href="#"
-									className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
-									aria-label="X (Twitter)"
-								>
-									<SiX className="w-4 h-4 text-[#020617]" />
-								</a>
-								<a
-									href="#"
+									href="https://www.facebook.com/profile.php?id=61578920711976&mibextid=wwXIfr&rdid=hiPgvkoGAG5G6lGI&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F16dXyNxw7J%2F%3Fmibextid%3DwwXIfr#"
+									target="_blank"
+									rel="noopener noreferrer"
 									className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
 									aria-label="Facebook"
 								>
 									<SiFacebook className="w-4 h-4 text-[#020617]" />
 								</a>
 								<a
-									href="#"
+									href="https://www.instagram.com/buildwithstack?igsh=MTliYXUxZXo5eDcxYQ%3D%3D&utm_source=qr"
+									target="_blank"
+									rel="noopener noreferrer"
 									className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
 									aria-label="Instagram"
 								>
@@ -54,14 +51,14 @@ export default function Footer() {
 
 						<div className="md:hidden flex flex-col items-end gap-3">
 							<a
-								href="#"
+								href="/privacy-policy"
 								className="text-sky-400 hover:text-sky-300 underline transition text-sm"
 								style={{ fontFamily: 'var(--font-source-sans-3), sans-serif' }}
 							>
 								Privacy Policy
 							</a>
 							<a
-								href="#"
+								href="/terms-of-service"
 								className="text-sky-400 hover:text-sky-300 underline transition text-sm"
 								style={{ fontFamily: 'var(--font-source-sans-3), sans-serif' }}
 							>
@@ -87,18 +84,11 @@ export default function Footer() {
 								Connect with Us
 							</h3>
 							<div className="flex gap-2 sm:gap-3">
-								{/* X/Twitter Icon */}
-								<a
-									href="#"
-									className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
-									aria-label="X (Twitter)"
-								>
-									<SiX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#020617]" />
-								</a>
-
 								{/* Facebook Icon */}
 								<a
-									href="#"
+									href="https://www.facebook.com/profile.php?id=61578920711976&mibextid=wwXIfr&rdid=hiPgvkoGAG5G6lGI&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F16dXyNxw7J%2F%3Fmibextid%3DwwXIfr#"
+									target="_blank"
+									rel="noopener noreferrer"
 									className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
 									aria-label="Facebook"
 								>
@@ -107,7 +97,9 @@ export default function Footer() {
 
 								{/* Instagram Icon */}
 								<a
-									href="#"
+									href="https://www.instagram.com/buildwithstack?igsh=MTliYXUxZXo5eDcxYQ%3D%3D&utm_source=qr"
+									target="_blank"
+									rel="noopener noreferrer"
 									className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition"
 									aria-label="Instagram"
 								>
@@ -132,14 +124,14 @@ export default function Footer() {
 					{/* Desktop: Show Privacy Policy and Terms of Service */}
 					<div className="hidden sm:flex gap-6">
 						<a
-							href="#"
+							href="/privacy-policy"
 							className="text-sky-400 hover:text-sky-300 underline transition"
 							style={{ fontFamily: 'var(--font-source-sans-3), sans-serif' }}
 						>
 							Privacy Policy
 						</a>
 						<a
-							href="#"
+							href="/terms-of-service"
 							className="text-sky-400 hover:text-sky-300 underline transition"
 							style={{ fontFamily: 'var(--font-source-sans-3), sans-serif' }}
 						>

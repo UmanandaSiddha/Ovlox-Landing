@@ -9,10 +9,10 @@ export default function TermsOfService() {
 	return (
 		<div className="bg-[#020617] min-h-screen w-full">
 			<Header />
-			
+
 			<main className="relative py-16 sm:py-20 overflow-hidden">
 				<AnimatedGradient />
-				
+
 				<div className="w-full px-4 sm:px-6 lg:w-[90%] lg:mx-auto relative z-10 lg:px-8">
 					<motion.div
 						initial={{ opacity: 0, y: 25 }}
@@ -34,7 +34,7 @@ export default function TermsOfService() {
 						>
 							Terms of Service
 						</h1>
-						
+
 						<p
 							className="text-center mb-12 text-base sm:text-lg"
 							style={{
@@ -387,7 +387,7 @@ export default function TermsOfService() {
 										color: '#60CAF9',
 									}}
 								>
-									Email: legal@ovlox.dev
+									Email: admin@learnwithstack.com
 								</p>
 							</section>
 						</div>

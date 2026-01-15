@@ -61,6 +61,12 @@ const testimonials = [
 	},
 ]
 
+export const metadata = {
+	title: "Product & Team Visibility Without the Noise",
+	description:
+		"Ovlox provides founders and product leaders with clear, human-readable summaries of development activity and team discussions across GitHub, Jira, Slack, and Discord.",
+}
+
 // Section wrapper component with scroll animation
 function AnimatedSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
 	const ref = useRef(null)

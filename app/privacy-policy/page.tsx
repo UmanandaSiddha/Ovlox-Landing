@@ -5,6 +5,15 @@ import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import AnimatedGradient from "@/components/AnimatedGradient"
 
+export const metadata = {
+	title: "Privacy Policy",
+	description:
+		"Read Ovlox’s privacy policy to understand how we collect, use, and protect your data when using our product and team visibility platform.",
+	alternates: {
+		canonical: "/privacy-policy",
+	},
+}
+
 export default function PrivacyPolicy() {
 	return (
 		<div className="bg-[#020617] min-h-screen w-full">

@@ -7,11 +7,13 @@ import { LeftArrow, QuotesIcon, RightArrow } from "@/assets"
 import AnimatedGradient from "@/components/AnimatedGradient"
 
 interface Testimonial {
-	id: number
-	quote: string
-	name: string
-	company: string
-	avatar: string
+	rating: number
+	content: string
+	author: {
+		name: string
+		image: any
+		role: string
+	}
 }
 
 interface TestimonialsSectionProps {
@@ -36,7 +38,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 	}, [])
 
 	// Constants
-	const CARD_WIDTH = 398 // Card max width
+	const CARD_WIDTH = 450 // Card max width (increased for better content display)
 	const GAP = 24 // Gap between items (gap-6 = 24px)
 	const ITEM_WIDTH = CARD_WIDTH + GAP // Total width per item including gap
 	const itemsPerView = isMobile ? 1 : isLargeScreen ? 3.5 : 2.5
@@ -109,11 +111,11 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 			{/* Animated Gradient Background */}
 			<AnimatedGradient />
 
-			{/* 90% width container for content, but carousel extends to 100% */}
-			<div className="absolute mx-auto relative z-10">
+			{/* Container with proper width and spacing */}
+			<div className="w-full px-4 sm:px-6 lg:w-[90%] lg:mx-auto relative z-10">
 				{/* Header */}
 				<h2
-					className="text-center mb-16"
+					className="text-center mb-12 sm:mb-16"
 					style={{
 						fontFamily: 'var(--font-manrope), sans-serif',
 						fontWeight: 600,
@@ -126,18 +128,20 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 					Real Progress. Real Stories.
 				</h2>
 
-				<div className="flex items-center justify-between">
+				{/* Desktop Layout - Side by side */}
+				<div className="hidden lg:flex items-start gap-8 xl:gap-12">
 
-					<div className="hidden lg:flex pl-30 flex-col items-start gap-6 w-[22%] flex-shrink-0 relative z-20" style={{ maxWidth: 'calc(70vw - 5vw)' }}>
-						<Image src={QuotesIcon} alt="Quotes" width={96} height={96} />
+					{/* Left Section - Quotes and Navigation */}
+					<div className="flex flex-col items-start gap-6 w-[20%] flex-shrink-0 relative z-20">
+						<Image src={QuotesIcon} alt="Quotes" width={96} height={96} className="w-16 h-16 xl:w-24 xl:h-24" />
 
 						<h3
 							className="text-left"
 							style={{
 								fontFamily: 'var(--font-source-sans-3), sans-serif',
 								fontWeight: 500,
-								fontSize: '32px',
-								lineHeight: '36px',
+								fontSize: 'clamp(24px, 2.5vw, 32px)',
+								lineHeight: '120%',
 								letterSpacing: '0%',
 								color: '#E5E7EB',
 							}}
@@ -145,25 +149,24 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 							What our customers are saying
 						</h3>
 
-						<div className="mt-8 flex gap-2 justify-between items-center w-full max-w-full overflow-hidden">
+						<div className="mt-6 flex gap-3 justify-between items-center w-full">
 							<button
 								onClick={prevSlide}
-								disabled={currentIndex === 0}
-								className="py-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 hover:scale-110 disabled:hover:scale-100"
+								disabled={isTransitioning}
+								className="p-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 hover:scale-110 disabled:hover:scale-100"
 								aria-label="Previous testimonial"
 							>
-								<LeftArrow color={currentIndex === 0 ? "#353845" : "#E5E7EB"} />
+								<LeftArrow color={isTransitioning ? "#353845" : "#E5E7EB"} />
 							</button>
 
 							<div className="flex items-center justify-center">
 								{testimonials.map((_, index) => {
-									// Calculate the actual index for infinite carousel
 									const actualIndex = currentIndex % testimonials.length
 									return (
 										<button
 											key={index}
 											onClick={() => goToSlide(index)}
-											className={`h-0.5 transition-all flex-shrink-0 ${index === actualIndex ? 'w-8 bg-white' : 'w-5 bg-white/30'
+											className={`h-0.5 transition-all duration-300 rounded-full ${index === actualIndex ? 'w-10 bg-white' : 'w-10 bg-white/30'
 												}`}
 											aria-label={`Go to testimonial ${index + 1}`}
 										/>
@@ -174,7 +177,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 							<button
 								onClick={nextSlide}
 								disabled={isTransitioning}
-								className="py-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 hover:scale-110 disabled:hover:scale-100"
+								className="p-2 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 hover:scale-110 disabled:hover:scale-100"
 								aria-label="Next testimonial"
 							>
 								<RightArrow color={isTransitioning ? "#353845" : "#E5E7EB"} />
@@ -182,11 +185,11 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 						</div>
 					</div>
 
-					{/* Desktop Carousel */}
-					<div className="hidden lg:block overflow-hidden relative" style={{ width: ITEM_WIDTH * 2 + CARD_WIDTH * 0.6 }}>
+					{/* Desktop Carousel - Right Side */}
+					<div className="flex-1 overflow-hidden relative min-w-0">
 						{/* Gradient fade for peeking item */}
-						<div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#020617] to-transparent z-10 pointer-events-none" />
-						<div className="w-full overflow-visible relative" style={{ height: 'auto' }}>
+						<div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#020617] to-transparent z-10 pointer-events-none" />
+						<div className="w-full overflow-visible relative" style={{ paddingLeft: 0 }}>
 							<motion.div
 								className="flex gap-6"
 								animate={{
@@ -203,78 +206,79 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 							>
 								{infiniteTestimonials.map((testimonial, index) => (
 									<div
-										key={`testimonial-${index}-${testimonial.id}`}
+										key={`testimonial-${index}-${testimonial.rating}`}
 										className="flex-shrink-0 flex justify-center"
 										style={{
-											width: `${ITEM_WIDTH}px`, // Exact item width including gap
+											width: `${ITEM_WIDTH}px`,
 										}}
 									>
 										<div
-											className="rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden w-full"
+											className="rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden w-full transition-all duration-300 hover:scale-[1.02]"
 											style={{
-												maxWidth: 398,
-												height: 224,
+												maxWidth: 450,
+												minHeight: 280,
 												borderRadius: 16,
-												border: '0.1px solid rgb(45, 82, 97)',
-												background: 'linear-gradient(to bottom, #02061700 0%, #38BDF81A 100%)',
-												boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+												border: '1px solid rgba(56, 189, 248, 0.2)',
+												background: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.6) 0%, rgba(56, 189, 248, 0.1) 100%)',
+												boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.3), 0 4px 8px -2px rgba(0, 0, 0, 0.2)'
 											}}
 										>
 											{/* Stars */}
-											<div className="flex gap-1.5 mb-4">
-												{[...Array(5)].map((_, i) => (
+											<div className="flex gap-1.5 mb-2">
+												{[...Array(testimonial.rating)].map((_, i) => (
 													<svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 														<path d="M10 0L12.2451 6.90983H19.5106L13.6327 11.1803L15.8779 18.0902L10 13.8197L4.12215 18.0902L6.36729 11.1803L0.489435 6.90983H7.75486L10 0Z" fill="#38BDF8" />
 													</svg>
 												))}
 											</div>
 
-											{/* Quote */}
+											{/* Content */}
 											<p
-												className="mb-5 flex-1 overflow-hidden"
+												className="flex-1 overflow-hidden"
 												style={{
 													fontFamily: 'var(--font-source-sans-3), sans-serif',
 													fontWeight: 400,
-													fontSize: '16px',
+													fontSize: '15px',
 													lineHeight: '160%',
 													letterSpacing: '0%',
 													color: '#E5E7EB',
 													display: '-webkit-box',
-													WebkitLineClamp: 7,
+													WebkitLineClamp: 8,
 													WebkitBoxOrient: 'vertical',
 													textOverflow: 'ellipsis',
 													overflow: 'hidden',
 												}}
 											>
-												{testimonial.quote}
+												{testimonial.content}
 											</p>
 
 											{/* Author */}
-											<div className="flex items-center gap-4 mt-auto pt-2">
-												<div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-1 ring-white/10">
+											<div className="flex items-center gap-3 mt-auto pt-3 border-t border-white/10">
+												<div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-2 ring-cyan-500/20">
 													<Image
-														src={testimonial.avatar}
-														alt={testimonial.name}
-														width={40}
-														height={40}
+														src={testimonial.author.image}
+														alt={testimonial.author.name}
+														width={48}
+														height={48}
 														className="w-full h-full object-cover"
 													/>
 												</div>
-												<div>
+												<div className="flex-1 min-w-0">
 													<p
-														className="mb-1"
+														className="mb-0.5 truncate"
 														style={{
 															fontFamily: 'var(--font-manrope), sans-serif',
 															fontWeight: 600,
-															fontSize: '14px',
+															fontSize: '15px',
 															lineHeight: '140%',
 															letterSpacing: '0%',
 															color: '#E5E7EB',
 														}}
 													>
-														{testimonial.name}
+														{testimonial.author.name}
 													</p>
 													<p
+														className="truncate"
 														style={{
 															fontFamily: 'var(--font-source-sans-3), sans-serif',
 															fontWeight: 400,
@@ -284,7 +288,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 															color: '#9CA3AF',
 														}}
 													>
-														{testimonial.company}
+														{testimonial.author.role}
 													</p>
 												</div>
 											</div>
@@ -297,7 +301,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 				</div>
 
 				{/* Mobile Carousel - Separate from desktop */}
-				<div className="lg:hidden w-full px-4 mt-8">
+				<div className="lg:hidden w-full mt-8">
 					<div className="w-full overflow-hidden">
 						<motion.div
 							className="flex"
@@ -313,80 +317,81 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 								width: `${testimonials.length * 100}%`
 							}}
 						>
-							{testimonials.map((testimonial) => (
+							{testimonials.map((testimonial, idx) => (
 								<div
-									key={testimonial.id}
+									key={`mobile-${idx}-${testimonial.rating}`}
 									className="flex-shrink-0 flex justify-center px-2"
 									style={{
 										width: `${100 / testimonials.length}%`
 									}}
 								>
 									<div
-										className="rounded-2xl p-5 flex flex-col gap-2.5 relative overflow-hidden w-full max-w-full"
+										className="rounded-2xl p-5 flex flex-col gap-4 relative overflow-hidden w-full max-w-full"
 										style={{
 											maxWidth: 398,
-											height: 224,
+											minHeight: 300,
 											borderRadius: 16,
-											border: '0.1px solid rgb(45, 82, 97)',
-											background: 'linear-gradient(to bottom, #02061700 0%, #38BDF81A 100%)',
-											boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+											border: '1px solid rgba(56, 189, 248, 0.2)',
+											background: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.6) 0%, rgba(56, 189, 248, 0.1) 100%)',
+											boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.3), 0 4px 8px -2px rgba(0, 0, 0, 0.2)'
 										}}
 									>
 										{/* Stars */}
-										<div className="flex gap-1.5 mb-4">
-											{[...Array(5)].map((_, i) => (
+										<div className="flex gap-1.5 mb-2">
+											{[...Array(testimonial.rating)].map((_, i) => (
 												<svg key={i} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 													<path d="M10 0L12.2451 6.90983H19.5106L13.6327 11.1803L15.8779 18.0902L10 13.8197L4.12215 18.0902L6.36729 11.1803L0.489435 6.90983H7.75486L10 0Z" fill="#38BDF8" />
 												</svg>
 											))}
 										</div>
 
-										{/* Quote */}
+										{/* Content */}
 										<p
-											className="mb-5 flex-1 overflow-hidden"
+											className="flex-1 overflow-hidden"
 											style={{
 												fontFamily: 'var(--font-source-sans-3), sans-serif',
 												fontWeight: 400,
-												fontSize: '16px',
+												fontSize: '15px',
 												lineHeight: '160%',
 												letterSpacing: '0%',
 												color: '#E5E7EB',
 												display: '-webkit-box',
-												WebkitLineClamp: 7,
+												WebkitLineClamp: 10,
 												WebkitBoxOrient: 'vertical',
 												textOverflow: 'ellipsis',
 												overflow: 'hidden',
 											}}
 										>
-											{testimonial.quote}
+											{testimonial.content}
 										</p>
 
 										{/* Author */}
-										<div className="flex items-center gap-4 mt-auto pt-2">
-											<div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-1 ring-white/10">
+										<div className="flex items-center gap-3 mt-auto pt-3 border-t border-white/10">
+											<div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-2 ring-cyan-500/20">
 												<Image
-													src={testimonial.avatar}
-													alt={testimonial.name}
-													width={40}
-													height={40}
+													src={testimonial.author.image}
+													alt={testimonial.author.name}
+													width={48}
+													height={48}
 													className="w-full h-full object-cover"
 												/>
 											</div>
-											<div>
+											<div className="flex-1 min-w-0">
 												<p
-													className="mb-1"
+													className="mb-0.5 truncate"
 													style={{
 														fontFamily: 'var(--font-manrope), sans-serif',
 														fontWeight: 600,
-														fontSize: '14px',
+														fontSize: '15px',
 														lineHeight: '140%',
 														letterSpacing: '0%',
 														color: '#E5E7EB',
 													}}
 												>
-													{testimonial.name}
+													{testimonial.author.name}
 												</p>
 												<p
+													className="truncate"
 													style={{
 														fontFamily: 'var(--font-source-sans-3), sans-serif',
 														fontWeight: 400,
@@ -396,7 +401,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 														color: '#9CA3AF',
 													}}
 												>
-													{testimonial.company}
+													{testimonial.author.role}
 												</p>
 											</div>
 										</div>
@@ -408,7 +413,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 				</div>
 
 				{/* Mobile Navigation Below */}
-				<div className="flex lg:hidden items-center justify-center gap-4 mt-8">
+				<div className="flex lg:hidden items-center justify-center gap-4 mt-6">
 					<button
 						onClick={prevSlide}
 						disabled={isTransitioning}
@@ -418,14 +423,14 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
 						<LeftArrow color={isTransitioning ? "#353845" : "#E5E7EB"} />
 					</button>
 
-					<div className="flex items-center rounded-full">
+					<div className="flex items-center gap-2">
 						{testimonials.map((_, index) => {
 							const actualIndex = currentIndex % testimonials.length
 							return (
 								<button
 									key={index}
 									onClick={() => goToSlide(index)}
-									className={`h-0.5 transition-all ${index === actualIndex ? 'w-8 bg-white' : 'w-8 bg-white/30'
+									className={`h-1 transition-all duration-300 rounded-full ${index === actualIndex ? 'w-10 bg-white' : 'w-6 bg-white/30'
 										}`}
 									aria-label={`Go to testimonial ${index + 1}`}
 								/>

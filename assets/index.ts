@@ -18,3 +18,7 @@ export { default as ResumeIcon } from "./resume.svg";
 export { default as VolumeUpIcon } from "./volume_up.svg";
 export { default as VolumeDownIcon } from "./mute.svg";
 export { default as ResizeIcon } from "./resize.svg";
+
+export { default as JEREMY_TESTIMONY } from './JeremyDavid.jpeg';
+export { default as MG_TESTIMONY } from './MG.jpeg';
+export { default as BADIE_TESTIMONY } from './BadieAlmualem.jpeg';

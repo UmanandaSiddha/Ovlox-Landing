@@ -12,53 +12,39 @@ import TestimonialsSection from "@/components/TestimonialsSection"
 import WaitlistSection from "@/components/WaitlistSection"
 import Footer from "@/components/Footer"
 import StickyVideoController from "@/components/StickyVideoController"
+import { BADIE_TESTIMONY, JEREMY_TESTIMONY, MG_TESTIMONY } from "@/assets"
 
 const HLS_URL = "https://dy7x01gt6ljdu.cloudfront.net/videos/intro/intro.m3u8"
 let unmutedRef = { current: false }
 
 const testimonials = [
-    {
-        id: 1,
-        quote: "Before this, I was constantly unsure aboully understood whatg me to learn technical tools. I finally feel confident asking the right questions and making decisions at the right time.",
-        name: "Startup Founder",
-        company: "Ovlox.dev",
-        avatar: "https://i.pravatar.cc/150?img=47"
-    },
-    {
-        id: 2,
-        quote: "This platform transformed how I track my team's progress. No more digging through technical jargon - just clear, actionable insights that help me make better decisions faster.",
-        name: "Product Manager",
-        company: "Tech Startup",
-        avatar: "https://i.pravatar.cc/150?img=12"
-    },
-    {
-        id: 3,
-        quote: "As a non-technical founder, this tool has been a game-changer. I can finally understand what's happening with my product without needing a computer science degree.",
-        name: "CEO",
-        company: "Innovation Labs",
-        avatar: "https://i.pravatar.cc/150?img=33"
-    },
-    {
-        id: 4,
-        quote: "The transparency this tool provides is incredible. I can see exactly what's happening with my projects without having to schedule multiple meetings or decode technical reports.",
-        name: "Operations Director",
-        company: "ScaleUp Inc",
-        avatar: "https://i.pravatar.cc/150?img=45"
-    },
-    {
-        id: 5,
-        quote: "Finally, a tool that speaks my language. No more confusion about project status - everything is clear, concise, and actionable. This has saved me countless hours.",
-        name: "Business Owner",
-        company: "Growth Ventures",
-        avatar: "https://i.pravatar.cc/150?img=20"
-    },
-    {
-        id: 6,
-        quote: "This platform bridges the gap between technical teams and business stakeholders perfectly. I can now participate in meaningful discussions about our product development without feeling lost.",
-        name: "Marketing Lead",
-        company: "Digital Solutions",
-        avatar: "https://i.pravatar.cc/150?img=15"
-    },
+	{
+		rating: 5,
+		content: "Working with this team on our Shopify website for Woodin.in was an exceptionally positive experience from start to finish. Their professionalism was evident in every interaction; they were incredibly responsive, understood our vision perfectly, and truly felt like an extension of our own team. The communication was clear and consistent, which made the entire process smooth and stress-free. They delivered a high-quality, fully functional e-commerce site exactly when they said they would, allowing us to launch on schedule. I would highly prefer to work with them again on future projects.",
+		author: {
+			name: "Badie Almualem",
+			image: BADIE_TESTIMONY,
+			role: "Owner, Woodin.in ",
+		}
+	},
+	{
+		rating: 5,
+		content: "Build With Stack played a crucial role in helping us scale ConvoGPT from a powerful idea to a functional AI-driven platform. Their deep expertise in automation, AI integrations, and frontend/backend development allowed us to build fast, iterate faster, and deliver a seamless experience to our users. Whether it was designing complex workflows, setting up AI agents, or ensuring rock-solid infrastructure, the team was proactive, responsive, and always solutions-focused. They're not just a dev agency, they're an extension of our core team.",
+		author: {
+			name: "Jeremy David",
+			image: JEREMY_TESTIMONY,
+			role: "CEO, ConvoGPT AI ",
+		}
+	},
+	{
+		rating: 5,
+		content: "Working with Build With Stack has been a total game-changer for Modvertise. We needed a custom-built, scalable solution that could support both our internal ops and client-facing systems and they delivered above and beyond. Their team not only understood our complex workflows but also helped simplify and automate key areas like scheduling, CRM, payment tracking, and reporting. Communication was smooth, timelines were respected, and the product exceeded expectations. If you're looking for a team that treats your project like their own startup, Build With Stack is who you want.",
+		author: {
+			name: "MG",
+			image: MG_TESTIMONY,
+			role: "CEO, modvertise.com ",
+		}
+	},
 ]
 
 function AnimatedSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
